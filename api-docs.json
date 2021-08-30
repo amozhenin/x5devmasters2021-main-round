@@ -1,0 +1,560 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:9080",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/api/v1/tick": {
+      "post": {
+        "tags": [
+          "perfect-store-endpoint"
+        ],
+        "summary": "Прожить еще одну минуту. На вход передаются управленческие решения менеджмента магазина (если нужны), проживается еще одна минута и возвращается состояние мира после прожитой минуты",
+        "operationId": "tick",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CurrentTickRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentWorldResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/loadWorld": {
+      "get": {
+        "tags": [
+          "perfect-store-endpoint"
+        ],
+        "summary": "Получить текущее состояние мира. Игра начинается с первичной загрузки данных о мире.",
+        "operationId": "loadWorld",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentWorldResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BuyStockCommand": {
+        "required": [
+          "productId",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "integer",
+            "description": "Id товара",
+            "format": "int32"
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "Количество товара",
+            "format": "int32"
+          }
+        },
+        "description": "Команда на закупку товара у поставщика на склад."
+      },
+      "CurrentTickRequest": {
+        "type": "object",
+        "properties": {
+          "fireEmployeeCommands": {
+            "type": "array",
+            "description": "Команды на увольнение сотрудников. Увольнение происходит только после отдыха от рабочей смены",
+            "items": {
+              "$ref": "#/components/schemas/FireEmployeeCommand"
+            }
+          },
+          "hireEmployeeCommands": {
+            "type": "array",
+            "description": "Команды на найм новых сотрудников",
+            "items": {
+              "$ref": "#/components/schemas/HireEmployeeCommand"
+            }
+          },
+          "setOnCheckoutLineCommands": {
+            "type": "array",
+            "description": "Команды для начала работы сотрудника за кассой",
+            "items": {
+              "$ref": "#/components/schemas/SetOnCheckoutLineCommand"
+            }
+          },
+          "setOffCheckoutLineCommands": {
+            "type": "array",
+            "description": "Команды для снятия сотрудника с кассы",
+            "items": {
+              "$ref": "#/components/schemas/SetOffCheckoutLineCommand"
+            }
+          },
+          "buyStockCommands": {
+            "type": "array",
+            "description": "Команды на закупку товара у поставщика на склад. При покупке товара на склад вы оплачиваете услуги транспортной компании в размере 5000р. Поэтому старайтесь заказывать реже и по многу",
+            "items": {
+              "$ref": "#/components/schemas/BuyStockCommand"
+            }
+          },
+          "putOffRackCellCommands": {
+            "type": "array",
+            "description": "Команды на снятие продукта с полки",
+            "items": {
+              "$ref": "#/components/schemas/PutOffRackCellCommand"
+            }
+          },
+          "putOnRackCellCommands": {
+            "type": "array",
+            "description": "Команды на выставление товаров на полки",
+            "items": {
+              "$ref": "#/components/schemas/PutOnRackCellCommand"
+            }
+          },
+          "setPriceCommands": {
+            "type": "array",
+            "description": "Команды установки цен",
+            "items": {
+              "$ref": "#/components/schemas/SetPriceCommand"
+            }
+          }
+        },
+        "description": "Объект описывает текущие менеджерские решения, которые нужно совершить в этом тике. Если никаких решений предпринимать не нужно, передается пустой объект"
+      },
+      "FireEmployeeCommand": {
+        "required": [
+          "employeeId"
+        ],
+        "type": "object",
+        "properties": {
+          "employeeId": {
+            "type": "integer",
+            "description": "Id увольняемого сотрудника",
+            "format": "int32"
+          }
+        },
+        "description": "Команда на увольнение сотрудника."
+      },
+      "HireEmployeeCommand": {
+        "required": [
+          "experience"
+        ],
+        "type": "object",
+        "properties": {
+          "experience": {
+            "type": "string",
+            "description": "Опытность сотрудника. Варианты можно увидеть в разделе recruitmentAgency",
+            "enum": [
+              "junior",
+              "middle",
+              "senior"
+            ]
+          },
+          "checkoutLineId": {
+            "type": "integer",
+            "description": "Если требуется посадить нового сотрудника за кассу, указать номер кассы",
+            "format": "int32"
+          }
+        },
+        "description": "Команда на найм нового сотрудника."
+      },
+      "PutOffRackCellCommand": {
+        "required": [
+          "rackCellId"
+        ],
+        "type": "object",
+        "properties": {
+          "rackCellId": {
+            "type": "integer",
+            "description": "Id полки",
+            "format": "int32"
+          }
+        },
+        "description": "Команда снять товар с полки"
+      },
+      "PutOnRackCellCommand": {
+        "required": [
+          "productId",
+          "productQuantity",
+          "rackCellId"
+        ],
+        "type": "object",
+        "properties": {
+          "rackCellId": {
+            "type": "integer",
+            "description": "Id полки",
+            "format": "int32"
+          },
+          "productId": {
+            "type": "integer",
+            "description": "Выставляемый товар",
+            "format": "int32"
+          },
+          "productQuantity": {
+            "type": "integer",
+            "description": "Количество продукта, которое нужно выставить",
+            "format": "int32"
+          },
+          "sellPrice": {
+            "type": "number",
+            "description": "Цена, по которой продукт может купить покупатель. Если цена на продукт уже была выставлена, то это поле можно не передавать",
+            "format": "double"
+          }
+        },
+        "description": "Команда выставить товар на полку. Товар можно выставить либо на пустую полку, либо на ту, на которой уже стоит данный товар."
+      },
+      "SetOffCheckoutLineCommand": {
+        "required": [
+          "employeeId"
+        ],
+        "type": "object",
+        "properties": {
+          "employeeId": {
+            "type": "integer",
+            "description": "Id сотрудника",
+            "format": "int32"
+          }
+        },
+        "description": "Команда на снятие сотрудника с кассы и начало отдыха."
+      },
+      "SetOnCheckoutLineCommand": {
+        "required": [
+          "checkoutLineId",
+          "employeeId"
+        ],
+        "type": "object",
+        "properties": {
+          "checkoutLineId": {
+            "type": "integer",
+            "description": "Номер кассы",
+            "format": "int32"
+          },
+          "employeeId": {
+            "type": "integer",
+            "description": "Id сотрудника",
+            "format": "int32"
+          }
+        },
+        "description": "Команда на отправку сотрудника на кассу."
+      },
+      "SetPriceCommand": {
+        "required": [
+          "productId",
+          "sellPrice"
+        ],
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "integer",
+            "description": "Id товара",
+            "format": "int32"
+          },
+          "sellPrice": {
+            "type": "number",
+            "description": "Цена, по которой продукт может купить покупатель.",
+            "format": "double"
+          }
+        },
+        "description": "Команда для задания (или изменения) цены товара для покупателя."
+      },
+      "CheckoutLine": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Номер кассовой линии",
+            "format": "int32"
+          },
+          "employeeId": {
+            "type": "integer",
+            "description": "Сотрудник, работающий в данный момент за этой кассой. Если касса закрыта, то незаполнено",
+            "format": "int32",
+            "nullable": true
+          },
+          "customerId": {
+            "type": "integer",
+            "description": "Сотрудник, оплачивающий товар на этой кассе",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "description": "Кассовая линия. За ней может работать кассир, либо она может быть закрыта"
+      },
+      "CurrentWorldResponse": {
+        "type": "object",
+        "properties": {
+          "tickCount": {
+            "type": "integer",
+            "description": "Количество тиков, которое будет длиться игра",
+            "format": "int32"
+          },
+          "currentTick": {
+            "type": "integer",
+            "description": "Текущее время игры (текущий тик или шаг)",
+            "format": "int32"
+          },
+          "income": {
+            "type": "number",
+            "description": "Текущая прибыль магазина",
+            "format": "double"
+          },
+          "salaryCosts": {
+            "type": "number",
+            "description": "Расходы на зарплату",
+            "format": "double"
+          },
+          "stockCosts": {
+            "type": "number",
+            "description": "Расходы на закупку товара",
+            "format": "double"
+          },
+          "gameOver": {
+            "type": "boolean",
+            "description": "Если true значит игра завершена, и дальнейшие вызовы сервера не нужны"
+          },
+          "checkoutLines": {
+            "type": "array",
+            "description": "Кассы",
+            "items": {
+              "$ref": "#/components/schemas/CheckoutLine"
+            }
+          },
+          "employees": {
+            "type": "array",
+            "description": "Сотрудники",
+            "items": {
+              "$ref": "#/components/schemas/Employee"
+            }
+          },
+          "recruitmentAgency": {
+            "type": "array",
+            "description": "Кадровое агенство. Справочная информация о том, каких сотрудников можно нанять и по какой ставке",
+            "items": {
+              "$ref": "#/components/schemas/EmployeeRecruitmentOffer"
+            }
+          },
+          "stock": {
+            "type": "array",
+            "description": "Склад с товарами",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          },
+          "rackCells": {
+            "type": "array",
+            "description": "Продуктовые полки",
+            "items": {
+              "$ref": "#/components/schemas/RackCell"
+            }
+          },
+          "customers": {
+            "type": "array",
+            "description": "Покупатели",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/Customer"
+            }
+          }
+        },
+        "description": "Объект описывает текущее состояние мира"
+      },
+      "Customer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Id покупателя",
+            "format": "int32"
+          },
+          "mode": {
+            "type": "string",
+            "description": "Фаза, в которой сейчас покупатель. Либо в торговом зале (in_hall), либо стоит в очереди на кассы (wait_checkout), либо уже расплачивается на кассе (at_checkout)",
+            "enum": [
+              "in_hall",
+              "wait_checkout",
+              "at_checkout"
+            ]
+          },
+          "basket": {
+            "type": "array",
+            "description": "Продуктовая корзина",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ProductInBasket"
+            }
+          }
+        },
+        "description": "Покуптель. Вначале покупатель находится в торговом зале и формирует корзину покупок. По окончании проходит на кассы и расплачивается",
+        "nullable": true
+      },
+      "Employee": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Табельный номер сотрудника",
+            "format": "int32"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "Имя сотрудника"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Имя сотрудника"
+          },
+          "experience": {
+            "type": "integer",
+            "description": "Опыт сотрудника",
+            "format": "int32"
+          },
+          "salary": {
+            "type": "integer",
+            "description": "Зарплата сотрудника в час",
+            "format": "int32"
+          }
+        },
+        "description": "Кассир. Работать может не больше 8 часов подряд, после смены должен отдыхать 16 часов.Сотрудник имеет показатель опыта от 10% до 100%. Чем больше опыт, тем быстрее он обслуживает клиента, но тем больше получает ЗП.Возможные вариант и зарплаты доступны в разделе RecruitmentAgency. Зарплата расчитывается с округлением до часа в пользу сотрудника. Сотрудника нельзя уволить пока он не отдохнул после смены и пока он на смене."
+      },
+      "EmployeeRecruitmentOffer": {
+        "type": "object",
+        "properties": {
+          "employeeType": {
+            "type": "string"
+          },
+          "experience": {
+            "type": "string"
+          },
+          "salary": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "description": "Кадровое агенство. Справочная информация о том, каких сотрудников можно нанять и по какой ставке"
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Id продукта",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "description": "Название продукта"
+          },
+          "stockPrice": {
+            "type": "number",
+            "description": "Закупочная цена",
+            "format": "double"
+          },
+          "inStock": {
+            "type": "integer",
+            "description": "Количество товара на складе",
+            "format": "int32"
+          },
+          "sellPrice": {
+            "type": "number",
+            "description": "Цена для покупателя. Если товар не выставлен на полку, то цена может быть не проставлена",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "description": "Продукт (товар) находится либо на складе либо может быть выложен на полку в магазине. Один продукт может лежать только на одной полке. Продукт на склад можно докупить по закупочной цене. И выставить на полку по любой цене. Чем дороже цена, тем сложнее покупателям купить товар."
+      },
+      "ProductInBasket": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Id продукта",
+            "format": "int32"
+          },
+          "productName": {
+            "type": "string",
+            "description": "Название продукта"
+          },
+          "priсe": {
+            "type": "number",
+            "description": "Цена по которой покупатель приобретает товар (фиксируется на момент взятия товара с полки)",
+            "format": "double",
+            "nullable": true
+          },
+          "productCount": {
+            "type": "integer",
+            "description": "Количество покупаемого товара",
+            "format": "int32"
+          }
+        },
+        "description": "Продукт в корзине покупателя.",
+        "nullable": true
+      },
+      "RackCell": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Id полки",
+            "format": "int32"
+          },
+          "visibility": {
+            "type": "integer",
+            "description": "Заметность полки для покупателя (1 - самая незаметная, 5 - самая заметная)",
+            "format": "int32"
+          },
+          "capacity": {
+            "type": "integer",
+            "description": "Максимальное количество товара на полке",
+            "format": "int32"
+          },
+          "productId": {
+            "type": "integer",
+            "description": "Id продукта, стоящего на полке (если полка пустая, то не заполняется)",
+            "format": "int32",
+            "nullable": true
+          },
+          "productName": {
+            "type": "string",
+            "description": "Название продукта, стоящего на полке (если полка пустая, то не заполняется)",
+            "nullable": true
+          },
+          "productQuantity": {
+            "type": "integer",
+            "description": "Количество продукта, стоящего на полке",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "description": "Продуктовая полка. На полке может находиться товар только одного вида, либо она может быть пустой. Полка может хранить определенное максимальное количество товаров. Также полки разнятся по заметности для покупателя (от 1 - самая незаметная, до 5 - максимально на виду"
+      }
+    }
+  }
+}
