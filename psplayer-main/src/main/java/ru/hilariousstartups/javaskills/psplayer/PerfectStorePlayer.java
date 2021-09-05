@@ -33,7 +33,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
         log.info("Игрок готов. Подключаемся к серверу..");
         CurrentWorldResponse currentWorldResponse = awaitServer(psApiClient);
-        printWorldStartData(currentWorldResponse);
+//        printWorldStartData(currentWorldResponse);
         log.info("Подключение к серверу успешно. Начинаем игру");
         try {
             int cnt = 0;
@@ -109,7 +109,9 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 });
 
                 currentWorldResponse = psApiClient.tick(request);
-
+                if (currentWorldResponse.isGameOver()) {
+                    printWorldEndData(currentWorldResponse);
+                }
             }
             while (!currentWorldResponse.isGameOver());
 
@@ -143,15 +145,15 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
         return response;
     }
 
-    private void printWorldStartData(CurrentWorldResponse world) {
-        log.info("currentTick = " + world.getCurrentTick() + ", tickCount = " + world.getTickCount());
+//    private void printWorldStartData(CurrentWorldResponse world) {
+//        log.info("currentTick = " + world.getCurrentTick() + ", tickCount = " + world.getTickCount());
 //        printCheckoutLinesInfo(world);
 //        printEmployeesInfo(world);
 //        printOffersInfo(world);
 //        printCustomersInfo(world);
 //        printRackCellInfo(world);
-        printProductInfo(world);
-    }
+//        printProductInfo(world);
+//    }
 
     private void printWorldEndData(CurrentWorldResponse world) {
         log.info("currentTick = " + world.getCurrentTick() + ", tickCount = " + world.getTickCount());
@@ -159,7 +161,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
         printEmployeesInfo(world);
 //        printOffersInfo(world);
         printCustomersInfo(world);
-        printRackCellInfo(world);
+//        printRackCellInfo(world);
 //        printProductInfo(world);
     }
 
