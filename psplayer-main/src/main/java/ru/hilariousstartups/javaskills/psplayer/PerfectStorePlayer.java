@@ -39,9 +39,9 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
             int cnt = 0;
             do {
                 cnt += 1;
-                if (cnt % 120 == 0) {
-                    log.info("Пройден " + cnt + " тик");
-                }
+//                if (cnt % 120 == 0) {
+//                    log.info("Пройден " + cnt + " тик");
+//                }
 
                 if (currentWorldResponse == null) {
                     currentWorldResponse = psApiClient.loadWorld();
@@ -147,7 +147,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
         log.info("currentTick = " + world.getCurrentTick() + ", tickCount = " + world.getTickCount());
 //        printCheckoutLinesInfo(world);
 //        printEmployeesInfo(world);
-        printOffersInfo(world);
+//        printOffersInfo(world);
 //        printCustomersInfo(world);
 //        printRackCellInfo(world);
         printProductInfo(world);
@@ -157,10 +157,10 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
         log.info("currentTick = " + world.getCurrentTick() + ", tickCount = " + world.getTickCount());
         printCheckoutLinesInfo(world);
         printEmployeesInfo(world);
-        printOffersInfo(world);
+//        printOffersInfo(world);
         printCustomersInfo(world);
         printRackCellInfo(world);
-        printProductInfo(world);
+//        printProductInfo(world);
     }
 
 
