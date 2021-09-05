@@ -32,11 +32,10 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
         PerfectStoreEndpointApi psApiClient = new PerfectStoreEndpointApi(apiClient);
 
         log.info("Игрок готов. Подключаемся к серверу..");
-        awaitServer(psApiClient);
-
+        CurrentWorldResponse currentWorldResponse = awaitServer(psApiClient);
+        printWorldData(currentWorldResponse);
         log.info("Подключение к серверу успешно. Начинаем игру");
         try {
-            CurrentWorldResponse currentWorldResponse = null;
             int cnt = 0;
             do {
                 cnt += 1;
@@ -123,16 +122,16 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
     }
 
-    private void awaitServer(PerfectStoreEndpointApi psApiClient) {
+    private CurrentWorldResponse awaitServer(PerfectStoreEndpointApi psApiClient) {
         int awaitTimes = 60;
         int cnt = 0;
+        CurrentWorldResponse response = null;
         boolean serverReady = false;
         do {
             try {
                 cnt += 1;
-                psApiClient.loadWorld();
+                response = psApiClient.loadWorld();
                 serverReady = true;
-
             } catch (ApiException e) {
                 try {
                     Thread.currentThread().sleep(1000L);
@@ -141,6 +140,37 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 }
             }
         } while (!serverReady && cnt < awaitTimes);
+        return response;
+    }
+
+    private void printWorldData(CurrentWorldResponse world) {
+        log.info("currentTick = " + world.getCurrentTick() + ", tickCount = " + world.getTickCount());
+        log.info("checkoutLines = " + world.getCheckoutLines().size());
+        for (CheckoutLine checkoutLine : world.getCheckoutLines()) {
+            log.info("id = " + checkoutLine.getId() + ", employeeId = " +
+                    (checkoutLine.getEmployeeId() == null ? "null": checkoutLine.getEmployeeId().toString())
+                    + ", customerId = " + (checkoutLine.getCustomerId() == null ? "null" : checkoutLine.getCustomerId().toString()));
+        }
+        log.info("employees = " + world.getEmployees().size());
+        for (Employee employee : world.getEmployees()) {
+            log.info("id = " + employee.getId() + ", firstName = " + employee.getFirstName() + ", lastName = " +
+                    employee.getLastName() + ", experience = " + employee.getExperience() + ", salary = " + employee.getSalary());
+        }
+        log.info("offers = " + world.getRecruitmentAgency().size());
+        log.info("customers = " + world.getCustomers().size());
+        log.info("rackCells = " + world.getRackCells().size());
+        for (RackCell rackCell : world.getRackCells()) {
+            log.info("id = " + rackCell.getId() + ", visibility = " + rackCell.getVisibility() + ", capacity = " +
+                    rackCell.getCapacity() + ", productId = " +
+                    (rackCell.getProductId() == null ? "null" : rackCell.getProductId().toString()) +
+                    ", productName = " + (rackCell.getProductName() == null ? "null" : rackCell.getProductName()) +
+                    ", productQuantity = " + (rackCell.getProductQuantity() == null ? "null" : rackCell.getProductQuantity().toString()));
+        }
+        log.info("products = " + world.getStock().size());
+        for (Product product : world.getStock()) {
+            log.info("id = " + product.getId() + ", name = " + product.getName() + ", inStock = " + product.getInStock() +
+                    ", stockPrice = " + product.getStockPrice() + ", sellPrice = " + (product.getSellPrice() == null ? "null" : product.getSellPrice().toString());
+        }
     }
 
 
