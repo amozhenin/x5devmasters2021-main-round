@@ -102,7 +102,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     command.setRackCellId(rack.getId());
                     command.setProductQuantity(orderQuantity);
                     if (producttoPutOnRack.getSellPrice() == null) {
-                        command.setSellPrice(producttoPutOnRack.getStockPrice() * 1.25);
+                        command.setSellPrice(producttoPutOnRack.getStockPrice() * 1.2);
                     }
                     putOnRackCellCommands.add(command);
 
