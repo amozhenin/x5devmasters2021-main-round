@@ -162,7 +162,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 //        printOffersInfo(world);
         printCustomersInfo(world);
         printRackCellInfo(world);
-//        printProductInfo(world);
+        printProductInfo(world);
     }
 
 
