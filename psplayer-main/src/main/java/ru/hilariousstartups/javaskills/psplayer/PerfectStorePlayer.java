@@ -56,7 +56,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 currentWorldResponse.getCheckoutLines().stream().filter(line -> line.getEmployeeId() == null).forEach(line -> {
                     HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
                     hireEmployeeCommand.setCheckoutLineId(line.getId());
-                    hireEmployeeCommand.setExperience(HireEmployeeCommand.ExperienceEnum.SENIOR);
+                    hireEmployeeCommand.setExperience(HireEmployeeCommand.ExperienceEnum.MIDDLE);
                     hireEmployeeCommands.add(hireEmployeeCommand);
                 });
                 request.setHireEmployeeCommands(hireEmployeeCommands);
