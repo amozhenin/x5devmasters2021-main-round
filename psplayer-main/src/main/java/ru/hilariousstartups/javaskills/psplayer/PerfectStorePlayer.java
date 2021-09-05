@@ -169,7 +169,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
         log.info("products = " + world.getStock().size());
         for (Product product : world.getStock()) {
             log.info("id = " + product.getId() + ", name = " + product.getName() + ", inStock = " + product.getInStock() +
-                    ", stockPrice = " + product.getStockPrice() + ", sellPrice = " + (product.getSellPrice() == null ? "null" : product.getSellPrice().toString());
+                    ", stockPrice = " + product.getStockPrice() + ", sellPrice = " + (product.getSellPrice() == null ? "null" : product.getSellPrice().toString()));
         }
     }
 
