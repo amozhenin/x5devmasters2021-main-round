@@ -102,7 +102,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     command.setRackCellId(rack.getId());
                     command.setProductQuantity(orderQuantity);
                     if (producttoPutOnRack.getSellPrice() == null) {
-                        command.setSellPrice(producttoPutOnRack.getStockPrice() + 10);
+                        command.setSellPrice(producttoPutOnRack.getStockPrice() * 2);
                     }
                     putOnRackCellCommands.add(command);
 
@@ -157,11 +157,11 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
     private void printWorldEndData(CurrentWorldResponse world) {
         log.info("currentTick = " + world.getCurrentTick() + ", tickCount = " + world.getTickCount());
-        printCheckoutLinesInfo(world);
-        printEmployeesInfo(world);
+//        printCheckoutLinesInfo(world);
+//        printEmployeesInfo(world);
 //        printOffersInfo(world);
         printCustomersInfo(world);
-//        printRackCellInfo(world);
+        printRackCellInfo(world);
 //        printProductInfo(world);
     }
 
@@ -194,6 +194,9 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
     private void printCustomersInfo(CurrentWorldResponse world) {
         log.info("customers = " + world.getCustomers().size());
+        for (Customer customer : world.getCustomers()) {
+            log.info("id = " + customer.getId() + ", mode = " + customer.getMode() + ", goods = " + customer.getBasket().size());
+        }
     }
 
     private void printEmployeesInfo(CurrentWorldResponse world) {
