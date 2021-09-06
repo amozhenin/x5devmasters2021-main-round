@@ -92,7 +92,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     if (producttoPutOnRack.getInStock() < orderQuantity) {
                         BuyStockCommand command = new BuyStockCommand();
                         command.setProductId(producttoPutOnRack.getId());
-                        command.setQuantity(100);
+                        command.setQuantity(1000);
                         buyStockCommands.add(command);
                     }
 
@@ -216,5 +216,6 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
         }
     }
 
+//    private void syncWorld(CurrentWorldResponse currentWorldResponse, )
 
 }
