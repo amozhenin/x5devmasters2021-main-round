@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
+import ru.dvorkin.x5.model.EmployeeManager;
+import ru.dvorkin.x5.model.ProductManager;
 import ru.hilariousstartups.javaskills.psplayer.swagger_codegen.ApiClient;
 import ru.hilariousstartups.javaskills.psplayer.swagger_codegen.ApiException;
 import ru.hilariousstartups.javaskills.psplayer.swagger_codegen.api.PerfectStoreEndpointApi;
@@ -19,9 +21,13 @@ import java.util.stream.Collectors;
 public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyEvent> {
 
     private String serverUrl;
+    private ProductManager productManager;
+    private EmployeeManager employeeManager;
 
     public PerfectStorePlayer(@Value("${rs.endpoint:http://localhost:9080}") String serverUrl) {
         this.serverUrl = serverUrl;
+        this.productManager = new ProductManager();
+        this.employeeManager = new EmployeeManager();
     }
 
     @Override
@@ -70,43 +76,67 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 List<Product> stock = currentWorldResponse.getStock();
                 List<RackCell> rackCells = currentWorldResponse.getRackCells();
 
-                // Обходим торговый зал и смотрим какие полки пустые. Выставляем на них товар.
-                currentWorldResponse.getRackCells().stream().filter(rack -> rack.getProductId() == null || rack.getProductQuantity().equals(0)).forEach(rack -> {
-                    Product producttoPutOnRack = null;
-                    if (rack.getProductId() == null) {
-                        List<Integer> productsOnRack = rackCells.stream().filter(r -> r.getProductId() != null).map(RackCell::getProductId).collect(Collectors.toList());
-                        productsOnRack.addAll(putOnRackCellCommands.stream().map(c -> c.getProductId()).collect(Collectors.toList()));
-                        producttoPutOnRack = stock.stream().filter(product -> !productsOnRack.contains(product.getId())).findFirst().orElse(null);
-                    }
-                    else {
-                        producttoPutOnRack = stock.stream().filter(product -> product.getId().equals(rack.getProductId())).findFirst().orElse(null);
-                    }
-
-                    Integer productQuantity = rack.getProductQuantity();
-                    if (productQuantity == null) {
-                        productQuantity = 0;
-                    }
-
-                    // Вначале закупим товар на склад. Каждый ход закупать товар накладно, но ведь это тестовый игрок.
-                    Integer orderQuantity = rack.getCapacity() - productQuantity;
-                    if (producttoPutOnRack.getInStock() < orderQuantity) {
+                for (Integer productId : productManager.getUsedProductIds()) {
+                    Integer quantity = productManager.getQuantityToBuy(productId);
+                    if ((stock.get(productId - 1).getInStock() == 0) &&
+                            ((currentWorldResponse.getTickCount() - currentWorldResponse.getCurrentTick()) > (quantity / employeeManager.getMaxEfficiency()))) {
                         BuyStockCommand command = new BuyStockCommand();
-                        command.setProductId(producttoPutOnRack.getId());
-                        command.setQuantity(10000);
+                        command.setProductId(productId);
+                        command.setQuantity(quantity);
                         buyStockCommands.add(command);
                     }
-
-                    // Далее разложим на полки. И сформируем цену. Накинем 10 рублей к оптовой цене
-                    PutOnRackCellCommand command = new PutOnRackCellCommand();
-                    command.setProductId(producttoPutOnRack.getId());
-                    command.setRackCellId(rack.getId());
-                    command.setProductQuantity(orderQuantity);
-                    if (producttoPutOnRack.getSellPrice() == null) {
-                        command.setSellPrice(producttoPutOnRack.getStockPrice() * 1.2);
+                }
+                for (RackCell rack : currentWorldResponse.getRackCells()) {
+                    if (rack.getProductId() == null || rack.getProductQuantity() < rack.getCapacity()) {
+                        Integer quantity = rack.getProductQuantity() == null ? 0 : rack.getProductQuantity();
+                        Product product = stock.get(productManager.getProductIdForRack(rack.getId()) - 1);
+                        Integer quantityToAdd = Math.min(rack.getCapacity() - quantity, product.getInStock());
+                        PutOnRackCellCommand command = new PutOnRackCellCommand();
+                        command.setProductId(product.getId());
+                        command.setRackCellId(rack.getId());
+                        command.setProductQuantity(quantityToAdd);
+                        command.setSellPrice(productManager.getSellPrice(product.getId(), product.getStockPrice()));
+                        putOnRackCellCommands.add(command);
                     }
-                    putOnRackCellCommands.add(command);
+                }
 
-                });
+                // Обходим торговый зал и смотрим какие полки пустые. Выставляем на них товар.
+//                currentWorldResponse.getRackCells().stream().filter(rack -> rack.getProductId() == null || rack.getProductQuantity().equals(0)).forEach(rack -> {
+//                    Product producttoPutOnRack = null;
+//                    if (rack.getProductId() == null) {
+//                        List<Integer> productsOnRack = rackCells.stream().filter(r -> r.getProductId() != null).map(RackCell::getProductId).collect(Collectors.toList());
+//                        productsOnRack.addAll(putOnRackCellCommands.stream().map(c -> c.getProductId()).collect(Collectors.toList()));
+//                        producttoPutOnRack = stock.stream().filter(product -> !productsOnRack.contains(product.getId())).findFirst().orElse(null);
+//                    }
+//                    else {
+//                        producttoPutOnRack = stock.stream().filter(product -> product.getId().equals(rack.getProductId())).findFirst().orElse(null);
+//                    }
+//
+//                    Integer productQuantity = rack.getProductQuantity();
+//                    if (productQuantity == null) {
+//                        productQuantity = 0;
+//                    }
+//
+//                    // Вначале закупим товар на склад. Каждый ход закупать товар накладно, но ведь это тестовый игрок.
+//                    Integer orderQuantity = rack.getCapacity() - productQuantity;
+//                    if (producttoPutOnRack.getInStock() < orderQuantity) {
+//                        BuyStockCommand command = new BuyStockCommand();
+//                        command.setProductId(producttoPutOnRack.getId());
+//                        command.setQuantity(10000);
+//                        buyStockCommands.add(command);
+//                    }
+//
+//                    // Далее разложим на полки. И сформируем цену. Накинем 10 рублей к оптовой цене
+//                    PutOnRackCellCommand command = new PutOnRackCellCommand();
+//                    command.setProductId(producttoPutOnRack.getId());
+//                    command.setRackCellId(rack.getId());
+//                    command.setProductQuantity(orderQuantity);
+//                    if (producttoPutOnRack.getSellPrice() == null) {
+//                        command.setSellPrice(producttoPutOnRack.getStockPrice() * 1.2);
+//                    }
+//                    putOnRackCellCommands.add(command);
+//
+//                });
 
                 currentWorldResponse = psApiClient.tick(request);
                 if (currentWorldResponse.isGameOver()) {
@@ -161,7 +191,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 //        printEmployeesInfo(world);
 //        printOffersInfo(world);
         printCustomersInfo(world);
-        printRackCellInfo(world);
+//        printRackCellInfo(world);
         printProductInfo(world);
     }
 
