@@ -5,7 +5,7 @@ import ru.hilariousstartups.javaskills.psplayer.swagger_codegen.model.HireEmploy
 public class EmployeeManager {
 
     public HireEmployeeCommand.ExperienceEnum getUsedExperience() {
-        return HireEmployeeCommand.ExperienceEnum.JUNIOR;
+        return HireEmployeeCommand.ExperienceEnum.SENIOR;
     }
 
     public Integer getMaxEfficiency() {
