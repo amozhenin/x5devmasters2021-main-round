@@ -92,7 +92,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     if (producttoPutOnRack.getInStock() < orderQuantity) {
                         BuyStockCommand command = new BuyStockCommand();
                         command.setProductId(producttoPutOnRack.getId());
-                        command.setQuantity(1000);
+                        command.setQuantity(10000);
                         buyStockCommands.add(command);
                     }
 
