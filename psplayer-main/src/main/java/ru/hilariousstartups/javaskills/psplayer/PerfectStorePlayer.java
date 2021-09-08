@@ -40,7 +40,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
         log.info("Игрок готов. Подключаемся к серверу..");
         CurrentWorldResponse currentWorldResponse = awaitServer(psApiClient);
-//        printWorldStartData(currentWorldResponse);
+        printWorldStartData(currentWorldResponse);
         log.info("Подключение к серверу успешно. Начинаем игру");
         try {
             int cnt = 0;
@@ -55,7 +55,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 }
                 final Integer currentTick = currentWorldResponse.getCurrentTick();
                 employeeManager.syncWithWorld(currentWorldResponse);
-
+                productManager.syncWithWorld(currentWorldResponse);
                 CurrentTickRequest request = new CurrentTickRequest();
 
                 List<HireEmployeeCommand> hireEmployeeCommands = new ArrayList<>();
@@ -93,15 +93,17 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 for (Integer productId : productManager.getUsedProductIds()) {
                     Integer rackId = productManager.getRackForProductId(productId);
                     Integer quantity = productManager.getQuantityToBuy(productId, rackId);
-                    if ((stock.get(productId - 1).getInStock() == 0) &&
+                    Product product = stock.get(productId - 1);
+                    if ((product.getInStock() == 0) &&
                             ((currentWorldResponse.getTickCount() - currentTick) > (quantity / employeeManager.getMaxEfficiency()))) {
                         BuyStockCommand command = new BuyStockCommand();
                         command.setProductId(productId);
                         command.setQuantity(quantity);
                         buyStockCommands.add(command);
+                        productManager.getInfoForProduct(product).addStock(quantity);
                     }
                 }
-                for (RackCell rack : currentWorldResponse.getRackCells()) {
+                for (RackCell rack : rackCells) {
                     if (rack.getProductId() == null || rack.getProductQuantity() < rack.getCapacity()) {
                         Integer quantity = rack.getProductQuantity() == null ? 0 : rack.getProductQuantity();
                         Product product = stock.get(productManager.getProductIdForRack(rack.getId()) - 1);
@@ -156,7 +158,9 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 currentWorldResponse = psApiClient.tick(request);
                 if (currentWorldResponse.isGameOver()) {
                     employeeManager.endGameStatusUpdate(currentWorldResponse.getCurrentTick());
+                    productManager.syncWithWorld(currentWorldResponse);
                     employeeManager.printEmployeeStatusStatistic();
+                    productManager.printProductStatistics();
                     printWorldEndData(currentWorldResponse);
                 }
             }
@@ -192,15 +196,15 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
         return response;
     }
 
-//    private void printWorldStartData(CurrentWorldResponse world) {
-//        log.info("currentTick = " + world.getCurrentTick() + ", tickCount = " + world.getTickCount());
+    private void printWorldStartData(CurrentWorldResponse world) {
+        log.info("currentTick = " + world.getCurrentTick() + ", tickCount = " + world.getTickCount());
 //        printCheckoutLinesInfo(world);
 //        printEmployeesInfo(world);
 //        printOffersInfo(world);
-//        printCustomersInfo(world);
+        printCustomersInfo(world);
 //        printRackCellInfo(world);
 //        printProductInfo(world);
-//    }
+    }
 
     private void printWorldEndData(CurrentWorldResponse world) {
         log.info("currentTick = " + world.getCurrentTick() + ", tickCount = " + world.getTickCount());
@@ -209,7 +213,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 //        printOffersInfo(world);
         printCustomersInfo(world);
 //        printRackCellInfo(world);
-        printProductInfo(world);
+//        printProductInfo(world);
     }
 
 
@@ -262,7 +266,4 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     + ", customerId = " + (checkoutLine.getCustomerId() == null ? "null" : checkoutLine.getCustomerId().toString()));
         }
     }
-
-//    private void syncWorld(CurrentWorldResponse currentWorldResponse, )
-
 }
