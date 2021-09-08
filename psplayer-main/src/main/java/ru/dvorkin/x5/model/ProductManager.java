@@ -9,7 +9,7 @@ public class ProductManager {
     }
 
     public Integer getQuantityToBuy(int productId) {
-        return 10000;
+        return 15000;
     }
 
     public Double getSellPrice(int productId, double stockPrice) {
