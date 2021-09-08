@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
+import ru.dvorkin.x5.model.EmployeeInfo;
 import ru.dvorkin.x5.model.EmployeeManager;
 import ru.dvorkin.x5.model.ProductManager;
 import ru.hilariousstartups.javaskills.psplayer.swagger_codegen.ApiClient;
@@ -52,21 +53,32 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 if (currentWorldResponse == null) {
                     currentWorldResponse = psApiClient.loadWorld();
                 }
-
+                final Integer currentTick = currentWorldResponse.getCurrentTick();
                 employeeManager.syncWithWorld(currentWorldResponse);
 
                 CurrentTickRequest request = new CurrentTickRequest();
 
                 List<HireEmployeeCommand> hireEmployeeCommands = new ArrayList<>();
+                List<SetOnCheckoutLineCommand> setOnCheckoutLineCommands = new ArrayList<>();
+
                 // Смотрим на каких кассах нет кассира (либо не был назначен, либо ушел с кассы отдыхать), нанимаем новых кассиров и ставим на эти кассы.
                 // Нанимаем самых опытных!
                 currentWorldResponse.getCheckoutLines().stream().filter(line -> line.getEmployeeId() == null).forEach(line -> {
-                    HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
-                    hireEmployeeCommand.setCheckoutLineId(line.getId());
-                    hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
-                    hireEmployeeCommands.add(hireEmployeeCommand);
+                    EmployeeInfo info = employeeManager.findReadyEmployeeForLine(line.getId());
+                    if (info != null) {
+                        SetOnCheckoutLineCommand command = new SetOnCheckoutLineCommand();
+                        command.setCheckoutLineId(line.getId());
+                        command.setEmployeeId(info.getEmployeeId());
+                        setOnCheckoutLineCommands.add(command);
+                    } else if (!employeeManager.aboutToHaveReadyEmployee(currentTick)) {
+                        HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
+                        hireEmployeeCommand.setCheckoutLineId(line.getId());
+                        hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
+                        hireEmployeeCommands.add(hireEmployeeCommand);
+                    } //else do nothing
                 });
                 request.setHireEmployeeCommands(hireEmployeeCommands);
+                request.setOnCheckoutLineCommands(setOnCheckoutLineCommands);
 
                 // готовимся закупать товар на склад и выставлять его на полки
                 ArrayList<BuyStockCommand> buyStockCommands = new ArrayList<>();
@@ -81,7 +93,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 for (Integer productId : productManager.getUsedProductIds()) {
                     Integer quantity = productManager.getQuantityToBuy(productId);
                     if ((stock.get(productId - 1).getInStock() == 0) &&
-                            ((currentWorldResponse.getTickCount() - currentWorldResponse.getCurrentTick()) > (quantity / employeeManager.getMaxEfficiency()))) {
+                            ((currentWorldResponse.getTickCount() - currentTick) > (quantity / employeeManager.getMaxEfficiency()))) {
                         BuyStockCommand command = new BuyStockCommand();
                         command.setProductId(productId);
                         command.setQuantity(quantity);

@@ -9,6 +9,7 @@ import ru.hilariousstartups.javaskills.psplayer.swagger_codegen.model.HireEmploy
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class EmployeeManager {
@@ -18,6 +19,7 @@ public class EmployeeManager {
 
     private static final int WORK_INTERVAL = 480;
     private static final int REST_INTERVAL = 960;
+    private static final int CLOSE_INTERVAL = -5;
 
     public EmployeeManager() {
         this.employeeInfo = new ArrayList<>();
@@ -121,5 +123,31 @@ public class EmployeeManager {
                         .filter(line -> employeeId.equals(line.getEmployeeId()))
                         .findFirst();
         return lineOpt;
+    }
+
+    public EmployeeInfo findReadyEmployeeForLine(Integer id) {
+        List<EmployeeInfo> readyList = employeeInfo
+                .stream()
+                .filter(info -> info.getStatus() == EmployeeStatus.READY_TO_WORK)
+                .collect(Collectors.toList());
+        if (readyList.isEmpty()) {
+            return null;
+        }
+        if (readyList.size() == 1) {
+            return readyList.get(0);
+        }
+        log.info("line is important!!");
+        Optional<EmployeeInfo> infoOpt = readyList.stream().filter(info -> id.equals(info.getLineId())).findFirst();
+        if (infoOpt.isPresent()) {
+            return infoOpt.get();
+        }
+        log.info("diff between null and other line?");
+        return readyList.get(0);
+
+    }
+
+    public boolean aboutToHaveReadyEmployee(Integer currentTick) {
+        return employeeInfo.stream().anyMatch(info -> (info.getStatus() == EmployeeStatus.REST) &&
+                (currentTick - info.getStatusChangeTick() - REST_INTERVAL >= CLOSE_INTERVAL));
     }
 }
