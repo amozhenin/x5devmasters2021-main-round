@@ -9,7 +9,29 @@ public class ProductManager {
     }
 
     public Integer getQuantityToBuy(int productId) {
-        return 15000;
+        switch (productId) {
+            case 1:
+            case 2:
+            case 3:
+                return 3800;
+            case 4:
+            case 5:
+            case 6:
+                return 4600;
+            case 7:
+            case 8:
+            case 9:
+                return 5100;
+            case 10:
+            case 11:
+            case 12:
+            case 13:
+            case 14:
+            case 15:
+                return 11000;
+            default:
+                return 11111;
+        }
     }
 
     public Double getSellPrice(int productId, double stockPrice) {
