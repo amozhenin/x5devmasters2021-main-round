@@ -53,6 +53,8 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     currentWorldResponse = psApiClient.loadWorld();
                 }
 
+                employeeManager.syncWithWorld(currentWorldResponse);
+
                 CurrentTickRequest request = new CurrentTickRequest();
 
                 List<HireEmployeeCommand> hireEmployeeCommands = new ArrayList<>();
@@ -140,6 +142,8 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
                 currentWorldResponse = psApiClient.tick(request);
                 if (currentWorldResponse.isGameOver()) {
+                    employeeManager.endGameStatusUpdate(currentWorldResponse.getCurrentTick());
+                    employeeManager.printEmployeeStatusStatistic();
                     printWorldEndData(currentWorldResponse);
                 }
             }
