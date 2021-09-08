@@ -1,15 +1,18 @@
 package ru.dvorkin.x5.model;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.List;
 
+@Slf4j
 public class ProductManager {
 
     public List<Integer> getUsedProductIds() {
         return List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
     }
 
-    public Integer getQuantityToBuy(int productId) {
-        switch (productId) {
+    public Integer getQuantityToBuy(int productId, int rackId) {
+        switch (rackId) {
             case 1:
             case 2:
             case 3:
@@ -40,5 +43,13 @@ public class ProductManager {
 
     public Integer getProductIdForRack(int rackId) {
         return getUsedProductIds().get(rackId - 1);
+    }
+
+    public Integer getRackForProductId(Integer productId) {
+        return getUsedProductIds().indexOf(productId) + 1;
+    }
+
+    public void printProductStatistics() {
+
     }
 }

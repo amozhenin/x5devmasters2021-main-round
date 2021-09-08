@@ -91,7 +91,8 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 List<RackCell> rackCells = currentWorldResponse.getRackCells();
 
                 for (Integer productId : productManager.getUsedProductIds()) {
-                    Integer quantity = productManager.getQuantityToBuy(productId);
+                    Integer rackId = productManager.getRackForProductId(productId);
+                    Integer quantity = productManager.getQuantityToBuy(productId, rackId);
                     if ((stock.get(productId - 1).getInStock() == 0) &&
                             ((currentWorldResponse.getTickCount() - currentTick) > (quantity / employeeManager.getMaxEfficiency()))) {
                         BuyStockCommand command = new BuyStockCommand();
