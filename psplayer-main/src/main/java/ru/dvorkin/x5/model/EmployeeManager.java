@@ -76,6 +76,7 @@ public class EmployeeManager {
                 case REST:
                     if (lineOpt.isPresent()) {
                         info.setStatus(EmployeeStatus.WORKING, currentTick);
+                        info.setLineId(lineOpt.get().getId());
                     } else if (currentTick - info.getStatusChangeTick() >= REST_INTERVAL) {
                         info.setStatus(EmployeeStatus.READY_TO_WORK, currentTick);
                     }
@@ -83,6 +84,7 @@ public class EmployeeManager {
                 case READY_TO_WORK:
                     if (lineOpt.isPresent()) {
                         info.setStatus(EmployeeStatus.WORKING, currentTick);
+                        info.setLineId(lineOpt.get().getId());
                     }
                     break;
             }
@@ -111,6 +113,7 @@ public class EmployeeManager {
             info.setStatus(EmployeeStatus.GAME_OVER, currentTick);
         }
     }
+
     private Optional<CheckoutLine> findCheckOutLineByEmployeeId(CurrentWorldResponse world, Integer employeeId) {
         Optional<CheckoutLine> lineOpt =
                 world.getCheckoutLines()

@@ -70,4 +70,8 @@ public class EmployeeInfo {
     public int getWorkTicks() {
         return this.workTicks;
     }
+
+    public void setLineId(Integer lineId) {
+        this.lineId = lineId;
+    }
 }
