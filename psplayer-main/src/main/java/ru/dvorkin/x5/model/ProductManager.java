@@ -13,11 +13,11 @@ public class ProductManager {
             case 1:
             case 2:
             case 3:
-                return 3800;
+                return 3700;
             case 4:
             case 5:
             case 6:
-                return 4600;
+                return 4500;
             case 7:
             case 8:
             case 9:
@@ -28,7 +28,7 @@ public class ProductManager {
             case 13:
             case 14:
             case 15:
-                return 11000;
+                return 11400;
             default:
                 return 11111;
         }
