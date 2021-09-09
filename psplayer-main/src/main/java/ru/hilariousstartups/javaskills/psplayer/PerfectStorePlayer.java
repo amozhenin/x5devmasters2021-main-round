@@ -122,16 +122,16 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     log.info(sb.toString());
                 }
 
-                if ((currentTick == 1000) || (currentTick == 5000) || (currentTick == 9000) ||
-                        (currentTick == 10000)) {
-                    Integer productId = 42;
-                    Integer rackId = productManager.getRackForProductId(productId);
-                    Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
-                    ProductInfo info = productManager.getUnsafeInfoForProductId(productId);
-                    int totalStock = info.getTotalStock();
-                    log.info(" estimate, tick = " + currentTick + ", productId = " + productId + ", quantity = " +
-                            quantity + ", totalEstimate =" + (totalStock + quantity) + ", sold =" + info.getSold());
-                }
+//                if ((currentTick == 1000) || (currentTick == 5000) || (currentTick == 9000) ||
+//                        (currentTick == 10000)) {
+//                    Integer productId = 42;
+//                    Integer rackId = productManager.getRackForProductId(productId);
+//                    Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
+//                    ProductInfo info = productManager.getUnsafeInfoForProductId(productId);
+//                    int totalStock = info.getTotalStock();
+//                    log.info(" estimate, tick = " + currentTick + ", productId = " + productId + ", quantity = " +
+//                            quantity + ", totalEstimate =" + (totalStock + quantity) + ", sold =" + info.getSold());
+//                }
 
                 //adding rock
                 if (currentTick == currentWorldResponse.getTickCount() - 5 && productManager.isRockEnabled()) {
