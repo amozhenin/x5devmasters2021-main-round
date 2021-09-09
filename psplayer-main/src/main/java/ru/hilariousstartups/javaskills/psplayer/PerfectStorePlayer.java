@@ -99,13 +99,12 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     for (Integer productId : productManager.getUsedProductIds()) {
                         Integer rackId = productManager.getRackForProductId(productId);
                         Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
-                        Product product = stock.get(productId - 1);
                         if (quantity > 0) {
                             BuyStockCommand command = new BuyStockCommand();
                             command.setProductId(productId);
                             command.setQuantity(quantity);
                             buyStockCommands.add(command);
-                            productManager.getInfoForProduct(product).addStock(quantity);
+                            productManager.getUnsafeInfoForProductId(productId).addStock(quantity);
                         }
                     }
                 }
@@ -113,9 +112,13 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 if (buyStockCommands.size() > 0) {
                     StringBuilder sb = new StringBuilder();
                     sb.append("buy, tick = ").append(currentTick).append(", count = ").append(buyStockCommands.size());
+                    double buyProfit = 0.0;
                     for (BuyStockCommand command: buyStockCommands) {
                         sb.append(" | productId = ").append(command.getProductId()).append(", quantity = ").append(command.getQuantity());
+                        ProductInfo info = productManager.getUnsafeInfoForProductId(command.getProductId());
+                        buyProfit += (info.getSellPrice() - info.getStockPrice()) * command.getQuantity();
                     }
+                    sb.append(" || buyProfit = " + buyProfit);
                     log.info(sb.toString());
                 }
 
@@ -124,7 +127,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     Integer productId = 42;
                     Integer rackId = productManager.getRackForProductId(productId);
                     Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
-                    ProductInfo info = productManager.getInfoForProduct(currentWorldResponse.getStock().get(productId - 1));
+                    ProductInfo info = productManager.getUnsafeInfoForProductId(productId);
                     int totalStock = info.getTotalStock();
                     log.info(" estimate, tick = " + currentTick + ", productId = " + productId + ", quantity = " +
                             quantity + ", totalEstimate =" + (totalStock + quantity) + ", sold =" + info.getSold());
@@ -133,12 +136,11 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 //adding rock
                 if (currentTick == currentWorldResponse.getTickCount() - 5 && productManager.isRockEnabled()) {
                     for (Integer productId : productManager.getUsedProductIds()) {
-                        Product product = stock.get(productId - 1);
                         BuyStockCommand command = new BuyStockCommand();
                         command.setProductId(productId);
                         command.setQuantity(ProductManager.ROCK_QUANTITY);
                         buyStockCommands.add(command);
-                        productManager.getInfoForProduct(product).addStock(ProductManager.ROCK_QUANTITY);
+                        productManager.getUnsafeInfoForProductId(productId).addStock(ProductManager.ROCK_QUANTITY);
                     }
                 }
 
