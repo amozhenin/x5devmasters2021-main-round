@@ -136,7 +136,6 @@ public class EmployeeManager {
         if (readyList.size() == 1) {
             return readyList.get(0);
         }
-        log.info("line is important!!");
         Optional<EmployeeInfo> infoOpt = readyList.stream().filter(info -> id.equals(info.getLineId())).findFirst();
         if (infoOpt.isPresent()) {
             return infoOpt.get();
