@@ -105,8 +105,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                         } else {
                             ProductInfo info = productManager.getInfoForProduct(product);
                             if (!info.isStopSpam()) {
-                                log.info("Decision not to buy, productId = " + productId + ", quantity = " + quantity + ", currentTick = " + currentTick);
-                                log.info(info.toString());
+                                log.info("Decision not to buy, productId = " + productId + ", quantity = " + quantity + ", currentTick = " + currentTick + ", info =" + info);
                                 info.stopSpam();
                             } //else we already see this stuff, stop spamming. really.
                         }
@@ -114,22 +113,23 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 }
 
                 if (buyStockCommands.size() > 0) {
-                    log.info("buy, tick =" + currentTick);
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("buy, tick = ").append(currentTick).append(", count = ").append(buyStockCommands.size());
                     for (BuyStockCommand command: buyStockCommands) {
-                        log.info(">>productId = " + command.getProductId() + ", quantity = " + command.getQuantity());
+                        sb.append(" | productId = ").append(command.getProductId()).append(", quantity = ").append(command.getQuantity());
                     }
+                    log.info(sb.toString());
                 }
 
-                if ((currentTick == 1) || (currentTick == 1000) || (currentTick == 5000) || (currentTick == 9000) ||
+                if ((currentTick == 1000) || (currentTick == 5000) || (currentTick == 9000) ||
                         (currentTick == 10000)) {
                     Integer productId = 42;
                     Integer rackId = productManager.getRackForProductId(productId);
                     Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
                     ProductInfo info = productManager.getInfoForProduct(currentWorldResponse.getStock().get(productId - 1));
                     int totalStock = info.getTotalStock();
-                    log.info("info:" + info);
                     log.info(" estimate, tick = " + currentTick + ", productId = " + productId + ", quantity = " +
-                            quantity + ", totalStock = " + totalStock + ", totalEstimate =" + (totalStock + quantity));
+                            quantity + ", totalStock = " + totalStock + ", totalEstimate =" + (totalStock + quantity) + ", info:" + info);
                 }
 
                 //adding rock
