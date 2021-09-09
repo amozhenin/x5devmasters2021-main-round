@@ -116,6 +116,13 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     }
                 }
 
+                if (buyStockCommands.size() > 0) {
+                    log.info("buy, tick =" + currentTick);
+                    for (BuyStockCommand command: buyStockCommands) {
+                        log.info(">>productId = " + command.getProductId() + ", quantity = " + command.getQuantity());
+                    }
+                }
+
                 for (RackCell rack : rackCells) {
                     if (rack.getProductId() == null || rack.getProductQuantity() < rack.getCapacity()) {
                         Integer quantity = rack.getProductQuantity() == null ? 0 : rack.getProductQuantity();
