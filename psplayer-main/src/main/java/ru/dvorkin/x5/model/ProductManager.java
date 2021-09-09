@@ -128,7 +128,7 @@ public class ProductManager {
     }
 
     public boolean isRockEnabled() {
-        return true;
+        return false;
     }
 
 }
