@@ -105,7 +105,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 }
 
                 //adding rock
-                if (currentTick == currentWorldResponse.getTickCount() - 5) {
+                if (currentTick == currentWorldResponse.getTickCount() - 5 && productManager.isRockEnabled()) {
                     for (Integer productId : productManager.getUsedProductIds()) {
                         Product product = stock.get(productId - 1);
                         BuyStockCommand command = new BuyStockCommand();

@@ -77,13 +77,13 @@ public class ProductManager {
         for (Integer productId: getUsedProductIds()) {
             ProductInfo info = usedProducts.get(productId);
             log.info(info.toString());
-            if (info.getInStock() < ROCK_QUANTITY) {
+            if (info.getInStock() <= (isRockEnabled() ? ROCK_QUANTITY : 0)) {
                 log.warn("Need quantity update on " + info.getProductId() + " " + info.getProductName());
             }
             totalSold += info.getSold();
             totalIneff += info.getTotalInefficiency();
             manageableIneff += info.getManageableInefficiency();
-            rockCost += info.getStockPrice() * ROCK_QUANTITY;
+            rockCost += info.getStockPrice() * (isRockEnabled() ? ROCK_QUANTITY : 0);
         }
         log.info("totalSold = " + totalSold);
         log.info("totalIneff = " + totalIneff);
@@ -96,7 +96,7 @@ public class ProductManager {
         for (Integer productId: getUsedProductIds()) {
             totalPrice += usedProducts.get(productId).getStockPrice();
         }
-        return totalPrice * ROCK_QUANTITY;
+        return totalPrice * (isRockEnabled() ? ROCK_QUANTITY : 0);
     }
 
     public ProductInfo getInfoForProduct(Product product) {
@@ -125,6 +125,10 @@ public class ProductManager {
             }
             info.setInBasket(inBasket);
         }
+    }
+
+    public boolean isRockEnabled() {
+        return true;
     }
 
 }
