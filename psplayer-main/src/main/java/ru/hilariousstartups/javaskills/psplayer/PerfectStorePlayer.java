@@ -95,12 +95,18 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     Integer rackId = productManager.getRackForProductId(productId);
                     Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
                     Product product = stock.get(productId - 1);
-                    if ((product.getInStock() == 0) && quantity > 100) {
-                        BuyStockCommand command = new BuyStockCommand();
-                        command.setProductId(productId);
-                        command.setQuantity(quantity);
-                        buyStockCommands.add(command);
-                        productManager.getInfoForProduct(product).addStock(quantity);
+                    if (product.getInStock() == 0) {
+                        if (quantity >= 100) {
+                            BuyStockCommand command = new BuyStockCommand();
+                            command.setProductId(productId);
+                            command.setQuantity(quantity);
+                            buyStockCommands.add(command);
+                            productManager.getInfoForProduct(product).addStock(quantity);
+                        } else {
+                            log.info("Decision not to buy, productId = " + productId + ", quantity = " + quantity + ", currentTick = " + currentTick);
+                            ProductInfo info = productManager.getInfoForProduct(product);
+                            log.info(info.toString());
+                        }
                     }
                 }
 
@@ -116,7 +122,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     Integer productId = 42;
                     Integer rackId = productManager.getRackForProductId(productId);
                     Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
-                    ProductInfo info = productManager.getInfoForProduct(currentWorldResponse.getStock().get(productId - 1))
+                    ProductInfo info = productManager.getInfoForProduct(currentWorldResponse.getStock().get(productId - 1));
                     int totalStock = info.getTotalStock();
                     log.info("info:" + info);
                     log.info(" estimate, tick = " + currentTick + ", productId = " + productId + ", quantity = " +
