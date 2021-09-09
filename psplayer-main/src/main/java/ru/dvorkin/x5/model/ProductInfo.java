@@ -18,6 +18,8 @@ public class ProductInfo {
 
     private int inBasket;
 
+    private boolean stopSpam;
+
     public ProductInfo(Integer productId, String productName, double stockPrice) {
         this.productId = productId;
         this.productName = productName;
@@ -27,6 +29,7 @@ public class ProductInfo {
         this.inRack = 0;
         this.inBasket = 0;
         this.sellPrice = stockPrice;
+        stopSpam = false;
     }
 
     public Integer getProductId() {
@@ -79,6 +82,14 @@ public class ProductInfo {
 
     public void setInBasket(int inBasket) {
         this.inBasket = inBasket;
+    }
+
+    public boolean isStopSpam() {
+        return stopSpam;
+    }
+
+    public void stopSpam() {
+        this.stopSpam = true;
     }
 
     public int getSold() {
