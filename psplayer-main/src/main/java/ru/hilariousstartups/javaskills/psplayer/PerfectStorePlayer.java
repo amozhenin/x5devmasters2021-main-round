@@ -97,7 +97,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                         } else {
                             if (!stopSpamBuys) {
                                 log.info("buy rejection, tick = " + currentTick);
-                                //stopSpamBuys = true;
+                                stopSpamBuys = true;
                             }
                         }
                     }
