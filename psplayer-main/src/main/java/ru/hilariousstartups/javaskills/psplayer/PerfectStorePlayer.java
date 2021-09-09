@@ -129,7 +129,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     ProductInfo info = productManager.getInfoForProduct(currentWorldResponse.getStock().get(productId - 1));
                     int totalStock = info.getTotalStock();
                     log.info(" estimate, tick = " + currentTick + ", productId = " + productId + ", quantity = " +
-                            quantity + ", totalStock = " + totalStock + ", totalEstimate =" + (totalStock + quantity) + ", info:" + info);
+                            quantity + ", totalEstimate =" + (totalStock + quantity) + ", sold =" + info.getSold());
                 }
 
                 //adding rock
