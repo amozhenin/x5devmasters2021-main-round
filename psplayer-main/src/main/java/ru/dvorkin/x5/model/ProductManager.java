@@ -81,7 +81,7 @@ public class ProductManager {
     }
 
     public void printProductStatistics() {
-        log.info("***usedProducts***");
+        log.info("*usedProducts*");
         int totalSold = 0;
         double totalIneff = 0.0;
         double manageableIneff = 0.0;
@@ -89,7 +89,7 @@ public class ProductManager {
         for (Integer productId: getUsedProductIds()) {
             ProductInfo info = usedProducts.get(productId);
             log.info(info.toString());
-            if (info.getInStock() <= (isRockEnabled() ? ROCK_QUANTITY : 0)) {
+            if (info.getInStock() < (isRockEnabled() ? ROCK_QUANTITY : 0)) {
                 log.warn("Need quantity update on " + info.getProductId() + " " + info.getProductName());
             }
             totalSold += info.getSold();
