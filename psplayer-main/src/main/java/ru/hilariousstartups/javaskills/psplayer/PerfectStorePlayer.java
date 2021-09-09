@@ -94,8 +94,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     Integer rackId = productManager.getRackForProductId(productId);
                     Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
                     Product product = stock.get(productId - 1);
-                    if ((product.getInStock() == 0) &&
-                            ((currentWorldResponse.getTickCount() - currentTick) > (quantity / employeeManager.getMaxEfficiency()))) {
+                    if ((product.getInStock() == 0) && quantity > 100) {
                         BuyStockCommand command = new BuyStockCommand();
                         command.setProductId(productId);
                         command.setQuantity(quantity);
