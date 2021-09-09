@@ -42,6 +42,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
         CurrentWorldResponse currentWorldResponse = awaitServer(psApiClient);
         try {
             int cnt = 0;
+            boolean stopSpamBuys = false;
             do {
                 cnt += 1;
 
@@ -91,7 +92,14 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
                     Product product = stock.get(productId - 1);
                     if (product.getInStock() == 0 && quantity > 0) {
-                        doBatchBuy = true;
+                        if (currentTick < 10000) {
+                            doBatchBuy = true;
+                        } else {
+                            if (!stopSpamBuys) {
+                                log.info("buy rejection, tick = " + currentTick);
+                                //stopSpamBuys = true;
+                            }
+                        }
                     }
                 }
 
@@ -132,6 +140,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 //                    log.info(" estimate, tick = " + currentTick + ", productId = " + productId + ", quantity = " +
 //                            quantity + ", totalEstimate =" + (totalStock + quantity) + ", sold =" + info.getSold());
 //                }
+
 
                 //adding rock
                 if (currentTick == currentWorldResponse.getTickCount() - 5 && productManager.isRockEnabled()) {
