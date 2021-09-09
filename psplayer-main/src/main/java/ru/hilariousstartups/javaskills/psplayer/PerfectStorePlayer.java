@@ -130,6 +130,16 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     log.info(sb.toString());
                 }
 
+                for (Integer productId : productManager.getUsedProductIds()) {
+                    ProductInfo info = productManager.getUnsafeInfoForProductId(productId);
+                    if (info.getInStock() == 0 && info.getInRack() == 0) {
+                        if (!info.isStopSpam()) {
+                            log.info(" all is out, id = " + info.getProductId() + ", tick = " + currentTick + ", sold = " + info.getSold());
+                            info.stopSpam();
+                        }
+                    }
+                }
+
 //                if ((currentTick == 1000) || (currentTick == 5000) || (currentTick == 9000) ||
 //                        (currentTick == 10000)) {
 //                    Integer productId = 42;
@@ -159,12 +169,14 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                         Integer quantity = rack.getProductQuantity() == null ? 0 : rack.getProductQuantity();
                         Product product = stock.get(productManager.getProductIdForRack(rack.getId()) - 1);
                         Integer quantityToAdd = Math.min(rack.getCapacity() - quantity, product.getInStock());
-                        PutOnRackCellCommand command = new PutOnRackCellCommand();
-                        command.setProductId(product.getId());
-                        command.setRackCellId(rack.getId());
-                        command.setProductQuantity(quantityToAdd);
-                        command.setSellPrice(productManager.getSellPrice(product.getId(), product.getStockPrice()));
-                        putOnRackCellCommands.add(command);
+                        if (quantityToAdd > 0) {
+                            PutOnRackCellCommand command = new PutOnRackCellCommand();
+                            command.setProductId(product.getId());
+                            command.setRackCellId(rack.getId());
+                            command.setProductQuantity(quantityToAdd);
+                            command.setSellPrice(productManager.getSellPrice(product.getId(), product.getStockPrice()));
+                            putOnRackCellCommands.add(command);
+                        }
                     }
                 }
 
