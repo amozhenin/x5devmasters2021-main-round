@@ -92,41 +92,42 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
                     Product product = stock.get(productId - 1);
                     if (product.getInStock() == 0 && quantity > 0) {
-                        if (currentTick < 10000) {
-                            doBatchBuy = true;
-                        } else {
-                            if (!stopSpamBuys) {
-                                log.info("buy rejection, tick = " + currentTick);
-                                stopSpamBuys = true;
-                            }
-                        }
+                        doBatchBuy = true;
                     }
                 }
 
+                double buyProfit = 0.0;
                 if (doBatchBuy) {
                     for (Integer productId : productManager.getUsedProductIds()) {
                         Integer rackId = productManager.getRackForProductId(productId);
                         Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
+                        ProductInfo info = productManager.getUnsafeInfoForProductId(productId);
                         if (quantity > 0) {
                             BuyStockCommand command = new BuyStockCommand();
                             command.setProductId(productId);
                             command.setQuantity(quantity);
+                            buyProfit += (info.getSellPrice() - info.getStockPrice()) * quantity;
                             buyStockCommands.add(command);
-                            productManager.getUnsafeInfoForProductId(productId).addStock(quantity);
                         }
+                    }
+                    if (buyProfit < 5000.0) {
+                        if (!stopSpamBuys) {
+                            log.info("buy rejection, tick = " + currentTick + ", buyProfit = " + buyProfit);
+                            stopSpamBuys = true;
+                        }
+                        buyStockCommands.clear();
                     }
                 }
 
                 if (buyStockCommands.size() > 0) {
                     StringBuilder sb = new StringBuilder();
                     sb.append("buy, tick = ").append(currentTick).append(", count = ").append(buyStockCommands.size());
-                    double buyProfit = 0.0;
                     for (BuyStockCommand command: buyStockCommands) {
                         sb.append(" | productId = ").append(command.getProductId()).append(", quantity = ").append(command.getQuantity());
                         ProductInfo info = productManager.getUnsafeInfoForProductId(command.getProductId());
-                        buyProfit += (info.getSellPrice() - info.getStockPrice()) * command.getQuantity();
+                        info.addStock(command.getQuantity());
                     }
-                    sb.append(" || buyProfit = " + buyProfit);
+                    sb.append(" || buyProfit = ").append(buyProfit);
                     log.info(sb.toString());
                 }
 
