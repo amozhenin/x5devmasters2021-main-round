@@ -69,7 +69,7 @@ public class ProductManager {
     }
 
     public Double getSellPrice(int productId, double stockPrice) {
-        return 1.25 * stockPrice;
+        return 1.35 * stockPrice;
     }
 
     public Integer getProductIdForRack(int rackId) {
