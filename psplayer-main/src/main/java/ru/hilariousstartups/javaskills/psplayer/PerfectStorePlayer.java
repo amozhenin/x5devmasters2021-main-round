@@ -85,23 +85,27 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 List<Product> stock = currentWorldResponse.getStock();
                 List<RackCell> rackCells = currentWorldResponse.getRackCells();
 
+                boolean doBatchBuy = false;
                 for (Integer productId : productManager.getUsedProductIds()) {
                     Integer rackId = productManager.getRackForProductId(productId);
                     Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
                     Product product = stock.get(productId - 1);
-                    if (product.getInStock() == 0) {
-                        if (quantity >= 100) {
+                    if (product.getInStock() == 0 && quantity > 0) {
+                        doBatchBuy = true;
+                    }
+                }
+
+                if (doBatchBuy) {
+                    for (Integer productId : productManager.getUsedProductIds()) {
+                        Integer rackId = productManager.getRackForProductId(productId);
+                        Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
+                        Product product = stock.get(productId - 1);
+                        if (quantity > 0) {
                             BuyStockCommand command = new BuyStockCommand();
                             command.setProductId(productId);
                             command.setQuantity(quantity);
                             buyStockCommands.add(command);
                             productManager.getInfoForProduct(product).addStock(quantity);
-                        } else {
-                            ProductInfo info = productManager.getInfoForProduct(product);
-                            if (!info.isStopSpam()) {
-                                log.info("Decision not to buy, productId = " + productId + ", quantity = " + quantity + ", currentTick = " + currentTick + ", info =" + info);
-                                info.stopSpam();
-                            } //else we already see this stuff, stop spamming. really.
                         }
                     }
                 }
