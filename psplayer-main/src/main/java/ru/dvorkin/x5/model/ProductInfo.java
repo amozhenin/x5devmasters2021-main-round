@@ -102,11 +102,11 @@ public class ProductInfo {
     }
 
     public double getTotalInefficiency() {
-        return (getInStock() + getInRack() + getInBasket()) * getStockCost();
+        return (getInStock() + getInRack() + getInBasket()) * getStockPrice();
     }
 
     public double getManageableInefficiency() {
-        return (getInStock()) * getStockCost();
+        return (getInStock()) * getStockPrice();
     }
 
     @Override
