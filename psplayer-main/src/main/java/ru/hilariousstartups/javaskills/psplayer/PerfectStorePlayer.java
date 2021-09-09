@@ -103,6 +103,19 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                         productManager.getInfoForProduct(product).addStock(quantity);
                     }
                 }
+
+                //adding rock
+                if (currentTick == currentWorldResponse.getTickCount() - 5 && productManager.isRockEnabled()) {
+                    for (Integer productId : productManager.getUsedProductIds()) {
+                        Product product = stock.get(productId - 1);
+                        BuyStockCommand command = new BuyStockCommand();
+                        command.setProductId(productId);
+                        command.setQuantity(ProductManager.ROCK_QUANTITY);
+                        buyStockCommands.add(command);
+                        productManager.getInfoForProduct(product).addStock(ProductManager.ROCK_QUANTITY);
+                    }
+                }
+
                 for (RackCell rack : rackCells) {
                     if (rack.getProductId() == null || rack.getProductQuantity() < rack.getCapacity()) {
                         Integer quantity = rack.getProductQuantity() == null ? 0 : rack.getProductQuantity();
@@ -167,6 +180,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
             while (!currentWorldResponse.isGameOver());
 
             // Если пришел Game Over, значит все время игры закончилось. Пора считать прибыль
+            log.info("Real score = " + (currentWorldResponse.getIncome() - currentWorldResponse.getSalaryCosts() - currentWorldResponse.getStockCosts() + productManager.getRockCost()));
             log.info("Я заработал " + (currentWorldResponse.getIncome() - currentWorldResponse.getSalaryCosts() - currentWorldResponse.getStockCosts()) + "руб.");
 
         } catch (ApiException e) {
