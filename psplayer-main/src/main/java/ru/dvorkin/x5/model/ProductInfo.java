@@ -101,6 +101,14 @@ public class ProductInfo {
         return getSold() * (getSellPrice() - getStockPrice());
     }
 
+    public double getTotalInefficiency() {
+        return (getInStock() + getInRack() + getInBasket()) * getStockCost();
+    }
+
+    public double getManageableInefficiency() {
+        return (getInStock()) * getStockCost();
+    }
+
     @Override
     public String toString() {
         return "id = " + getProductId() + ", name = " + getProductName() + ", stockPrice = " +
@@ -108,6 +116,7 @@ public class ProductInfo {
                 getTotalStock() + ", inStock = " + getInStock() + ", inRack = " + getInRack() +
                 ", inBasket = " + getInBasket() + ", sold = " + getSold() + ", income = " +
                 getIncome() + ", stockCost = " + getStockCost() + ", profit = " + getProfit() +
-                ", soldProfit = " + getSoldProfit();
+                ", soldProfit = " + getSoldProfit() + ", totalIneff = " + getTotalInefficiency() +
+                ", manageableIneff = " + getManageableInefficiency();
     }
 }

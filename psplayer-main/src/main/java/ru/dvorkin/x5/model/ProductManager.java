@@ -16,6 +16,8 @@ public class ProductManager {
 
     private final Map<Integer, ProductInfo> usedProducts;
 
+    public final static int ROCK_QUANTITY = 1000;
+
     public ProductManager() {
         usedProducts = new HashMap<>();
     }
@@ -24,6 +26,7 @@ public class ProductManager {
         //return List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
         //return List.of(16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30);
         //return List.of(31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45);
+        // 46
         return List.of(42, 29, 26, 17, 27, 13, 39, 21, 22, 24, 23, 32, 31, 41, 40);
     }
 
@@ -68,12 +71,29 @@ public class ProductManager {
     public void printProductStatistics() {
         log.info("***usedProducts***");
         int totalSold = 0;
+        double totalIneff = 0.0;
+        double manageableIneff = 0.0;
         for (Integer productId: getUsedProductIds()) {
             ProductInfo info = usedProducts.get(productId);
             log.info(info.toString());
+            if (info.getInStock() < ROCK_QUANTITY) {
+                log.warn("Need quantity update on " + info.getProductId() + " " + info.getProductName());
+            }
             totalSold += info.getSold();
+            totalIneff += info.getTotalInefficiency();
+            manageableIneff += info.getManageableInefficiency();
         }
         log.info("totalSold = " + totalSold);
+        log.info("totalIneff = " + totalIneff);
+        log.info("manageableIneff = " + manageableIneff);
+    }
+
+    public Double getRockCost() {
+        double totalPrice = 0.0;
+        for (Integer productId: getUsedProductIds()) {
+            totalPrice += usedProducts.get(productId).getStockPrice();
+        }
+        return totalPrice * ROCK_QUANTITY;
     }
 
     public ProductInfo getInfoForProduct(Product product) {
@@ -103,4 +123,5 @@ public class ProductManager {
             info.setInBasket(inBasket);
         }
     }
+
 }
