@@ -103,9 +103,12 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                             buyStockCommands.add(command);
                             productManager.getInfoForProduct(product).addStock(quantity);
                         } else {
-                            log.info("Decision not to buy, productId = " + productId + ", quantity = " + quantity + ", currentTick = " + currentTick);
                             ProductInfo info = productManager.getInfoForProduct(product);
-                            log.info(info.toString());
+                            if (!info.isStopSpam()) {
+                                log.info("Decision not to buy, productId = " + productId + ", quantity = " + quantity + ", currentTick = " + currentTick);
+                                log.info(info.toString());
+                                info.stopSpam();
+                            } //else we already see this stuff, stop spamming. really.
                         }
                     }
                 }
