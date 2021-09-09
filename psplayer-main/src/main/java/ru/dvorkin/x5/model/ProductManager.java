@@ -62,7 +62,7 @@ public class ProductManager {
                     return 11111;
             }
         } else {
-            double totalToBuy = ((double) info.getSold() * world.getCurrentTick()) / world.getTickCount();
+            double totalToBuy = ((double) info.getSold() * world.getTickCount()) / world.getCurrentTick();
             int total = (int)Math.round(totalToBuy);
             return (total - info.getTotalStock());
         }
