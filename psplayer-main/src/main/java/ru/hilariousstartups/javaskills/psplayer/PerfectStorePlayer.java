@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 import ru.dvorkin.x5.model.EmployeeInfo;
 import ru.dvorkin.x5.model.EmployeeManager;
+import ru.dvorkin.x5.model.ProductInfo;
 import ru.dvorkin.x5.model.ProductManager;
 import ru.hilariousstartups.javaskills.psplayer.swagger_codegen.ApiClient;
 import ru.hilariousstartups.javaskills.psplayer.swagger_codegen.ApiException;
@@ -115,7 +116,9 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     Integer productId = 42;
                     Integer rackId = productManager.getRackForProductId(productId);
                     Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
-                    int totalStock = productManager.getInfoForProduct(currentWorldResponse.getStock().get(productId - 1)).getTotalStock();
+                    ProductInfo info = productManager.getInfoForProduct(currentWorldResponse.getStock().get(productId - 1))
+                    int totalStock = info.getTotalStock();
+                    log.info("info:" + info);
                     log.info(" estimate, tick = " + currentTick + ", productId = " + productId + ", quantity = " +
                             quantity + ", totalStock = " + totalStock + ", totalEstimate =" + (totalStock + quantity));
                 }
@@ -160,7 +163,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
             // Если пришел Game Over, значит все время игры закончилось. Пора считать прибыль
             log.info("Real score = " + (currentWorldResponse.getIncome() - currentWorldResponse.getSalaryCosts() - currentWorldResponse.getStockCosts() + productManager.getRockCost()));
-            log.info("Я заработал " + (currentWorldResponse.getIncome() - currentWorldResponse.getSalaryCosts() - currentWorldResponse.getStockCosts()) + "руб.");
+            log.info("Я заработал " + (currentWorldResponse.getIncome() - currentWorldResponse.getSalaryCosts() - currentWorldResponse.getStockCosts()) + " руб.");
 
         } catch (ApiException e) {
             log.error(e.getMessage(), e);
