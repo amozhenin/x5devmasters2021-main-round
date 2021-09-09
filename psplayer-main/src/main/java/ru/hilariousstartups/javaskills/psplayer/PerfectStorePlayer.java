@@ -40,7 +40,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
         log.info("Игрок готов. Подключаемся к серверу..");
         CurrentWorldResponse currentWorldResponse = awaitServer(psApiClient);
-        printWorldStartData(currentWorldResponse);
+//        printWorldStartData(currentWorldResponse);
         log.info("Подключение к серверу успешно. Начинаем игру");
         try {
             int cnt = 0;
