@@ -123,11 +123,8 @@ public class ProductInfo {
     @Override
     public String toString() {
         return "id = " + getProductId() + ", name = " + getProductName() + ", stockPrice = " +
-                getStockPrice() + ", sellPrice = " + getSellPrice() + ", totalStock =" +
+                getStockPrice() + ", sellPrice = " + getSellPrice() + ", totalStock = " +
                 getTotalStock() + ", inStock = " + getInStock() + ", inRack = " + getInRack() +
-                ", inBasket = " + getInBasket() + ", sold = " + getSold() + ", income = " +
-                getIncome() + ", stockCost = " + getStockCost() + ", profit = " + getProfit() +
-                ", soldProfit = " + getSoldProfit() + ", totalIneff = " + getTotalInefficiency() +
-                ", manageableIneff = " + getManageableInefficiency();
+                ", inBasket = " + getInBasket() + ", sold = " + getSold();
     }
 }
