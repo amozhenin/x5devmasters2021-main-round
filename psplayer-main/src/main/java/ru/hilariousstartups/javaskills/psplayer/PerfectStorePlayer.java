@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 import ru.dvorkin.x5.model.EmployeeInfo;
 import ru.dvorkin.x5.model.EmployeeManager;
+import ru.dvorkin.x5.model.ProductInfo;
 import ru.dvorkin.x5.model.ProductManager;
 import ru.hilariousstartups.javaskills.psplayer.swagger_codegen.ApiClient;
 import ru.hilariousstartups.javaskills.psplayer.swagger_codegen.ApiException;
@@ -38,22 +39,17 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
         PerfectStoreEndpointApi psApiClient = new PerfectStoreEndpointApi(apiClient);
 
-        log.info("Игрок готов. Подключаемся к серверу..");
         CurrentWorldResponse currentWorldResponse = awaitServer(psApiClient);
-//        printWorldStartData(currentWorldResponse);
-        log.info("Подключение к серверу успешно. Начинаем игру");
         try {
             int cnt = 0;
+            boolean stopSpamBuys = false;
             do {
                 cnt += 1;
-//                if (cnt % 120 == 0) {
-//                    log.info("Пройден " + cnt + " тик");
-//                }
 
                 if (currentWorldResponse == null) {
                     currentWorldResponse = psApiClient.loadWorld();
                 }
-                final Integer currentTick = currentWorldResponse.getCurrentTick();
+                final int currentTick = currentWorldResponse.getCurrentTick();
                 employeeManager.syncWithWorld(currentWorldResponse);
                 productManager.syncWithWorld(currentWorldResponse);
                 CurrentTickRequest request = new CurrentTickRequest();
@@ -90,70 +86,100 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 List<Product> stock = currentWorldResponse.getStock();
                 List<RackCell> rackCells = currentWorldResponse.getRackCells();
 
+                boolean doBatchBuy = false;
                 for (Integer productId : productManager.getUsedProductIds()) {
                     Integer rackId = productManager.getRackForProductId(productId);
-                    Integer quantity = productManager.getQuantityToBuy(productId, rackId);
+                    Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
                     Product product = stock.get(productId - 1);
-                    if ((product.getInStock() == 0) &&
-                            ((currentWorldResponse.getTickCount() - currentTick) > (quantity / employeeManager.getMaxEfficiency()))) {
-                        BuyStockCommand command = new BuyStockCommand();
-                        command.setProductId(productId);
-                        command.setQuantity(quantity);
-                        buyStockCommands.add(command);
-                        productManager.getInfoForProduct(product).addStock(quantity);
+                    if (product.getInStock() == 0 && quantity > 0) {
+                        doBatchBuy = true;
                     }
                 }
+
+                double buyProfit = 0.0;
+                if (doBatchBuy) {
+                    for (Integer productId : productManager.getUsedProductIds()) {
+                        Integer rackId = productManager.getRackForProductId(productId);
+                        Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
+                        ProductInfo info = productManager.getUnsafeInfoForProductId(productId);
+                        if (quantity > 0) {
+                            BuyStockCommand command = new BuyStockCommand();
+                            command.setProductId(productId);
+                            command.setQuantity(quantity);
+                            buyProfit += (info.getSellPrice() - info.getStockPrice()) * quantity;
+                            buyStockCommands.add(command);
+                        }
+                    }
+                    if (buyProfit < 5000.0) {
+                        if (!stopSpamBuys) {
+                            log.info("buy rejection, tick = " + currentTick + ", buyProfit = " + buyProfit);
+                            stopSpamBuys = true;
+                        }
+                        buyStockCommands.clear();
+                    }
+                }
+
+                if (buyStockCommands.size() > 0) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("buy, tick = ").append(currentTick).append(", count = ").append(buyStockCommands.size());
+                    for (BuyStockCommand command: buyStockCommands) {
+                        sb.append(" | productId = ").append(command.getProductId()).append(", quantity = ").append(command.getQuantity());
+                        ProductInfo info = productManager.getUnsafeInfoForProductId(command.getProductId());
+                        info.addStock(command.getQuantity());
+                    }
+                    sb.append(" || buyProfit = ").append(buyProfit);
+                    log.info(sb.toString());
+                }
+
+                for (Integer productId : productManager.getUsedProductIds()) {
+                    ProductInfo info = productManager.getUnsafeInfoForProductId(productId);
+                    if (info.getInStock() == 0 && info.getInRack() == 0 && currentTick > 0) {
+                        if (!info.isStopSpam()) {
+                            log.info(" all is out, id = " + info.getProductId() + ", tick = " + currentTick + ", sold = " + info.getSold());
+                            info.stopSpam();
+                        }
+                    }
+                }
+
+//                if ((currentTick == 1000) || (currentTick == 5000) || (currentTick == 9000) ||
+//                        (currentTick == 10000)) {
+//                    Integer productId = 42;
+//                    Integer rackId = productManager.getRackForProductId(productId);
+//                    Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
+//                    ProductInfo info = productManager.getUnsafeInfoForProductId(productId);
+//                    int totalStock = info.getTotalStock();
+//                    log.info(" estimate, tick = " + currentTick + ", productId = " + productId + ", quantity = " +
+//                            quantity + ", totalEstimate =" + (totalStock + quantity) + ", sold =" + info.getSold());
+//                }
+
+
+                //adding rock
+                if (currentTick == currentWorldResponse.getTickCount() - 5 && productManager.isRockEnabled()) {
+                    for (Integer productId : productManager.getUsedProductIds()) {
+                        BuyStockCommand command = new BuyStockCommand();
+                        command.setProductId(productId);
+                        command.setQuantity(ProductManager.ROCK_QUANTITY);
+                        buyStockCommands.add(command);
+                        productManager.getUnsafeInfoForProductId(productId).addStock(ProductManager.ROCK_QUANTITY);
+                    }
+                }
+
+
                 for (RackCell rack : rackCells) {
                     if (rack.getProductId() == null || rack.getProductQuantity() < rack.getCapacity()) {
                         Integer quantity = rack.getProductQuantity() == null ? 0 : rack.getProductQuantity();
                         Product product = stock.get(productManager.getProductIdForRack(rack.getId()) - 1);
                         Integer quantityToAdd = Math.min(rack.getCapacity() - quantity, product.getInStock());
-                        PutOnRackCellCommand command = new PutOnRackCellCommand();
-                        command.setProductId(product.getId());
-                        command.setRackCellId(rack.getId());
-                        command.setProductQuantity(quantityToAdd);
-                        command.setSellPrice(productManager.getSellPrice(product.getId(), product.getStockPrice()));
-                        putOnRackCellCommands.add(command);
+                        if (quantityToAdd > 0) {
+                            PutOnRackCellCommand command = new PutOnRackCellCommand();
+                            command.setProductId(product.getId());
+                            command.setRackCellId(rack.getId());
+                            command.setProductQuantity(quantityToAdd);
+                            command.setSellPrice(productManager.getSellPrice(product.getId(), product.getStockPrice()));
+                            putOnRackCellCommands.add(command);
+                        }
                     }
                 }
-
-                // Обходим торговый зал и смотрим какие полки пустые. Выставляем на них товар.
-//                currentWorldResponse.getRackCells().stream().filter(rack -> rack.getProductId() == null || rack.getProductQuantity().equals(0)).forEach(rack -> {
-//                    Product producttoPutOnRack = null;
-//                    if (rack.getProductId() == null) {
-//                        List<Integer> productsOnRack = rackCells.stream().filter(r -> r.getProductId() != null).map(RackCell::getProductId).collect(Collectors.toList());
-//                        productsOnRack.addAll(putOnRackCellCommands.stream().map(c -> c.getProductId()).collect(Collectors.toList()));
-//                        producttoPutOnRack = stock.stream().filter(product -> !productsOnRack.contains(product.getId())).findFirst().orElse(null);
-//                    }
-//                    else {
-//                        producttoPutOnRack = stock.stream().filter(product -> product.getId().equals(rack.getProductId())).findFirst().orElse(null);
-//                    }
-//
-//                    Integer productQuantity = rack.getProductQuantity();
-//                    if (productQuantity == null) {
-//                        productQuantity = 0;
-//                    }
-//
-//                    // Вначале закупим товар на склад. Каждый ход закупать товар накладно, но ведь это тестовый игрок.
-//                    Integer orderQuantity = rack.getCapacity() - productQuantity;
-//                    if (producttoPutOnRack.getInStock() < orderQuantity) {
-//                        BuyStockCommand command = new BuyStockCommand();
-//                        command.setProductId(producttoPutOnRack.getId());
-//                        command.setQuantity(10000);
-//                        buyStockCommands.add(command);
-//                    }
-//
-//                    // Далее разложим на полки. И сформируем цену. Накинем 10 рублей к оптовой цене
-//                    PutOnRackCellCommand command = new PutOnRackCellCommand();
-//                    command.setProductId(producttoPutOnRack.getId());
-//                    command.setRackCellId(rack.getId());
-//                    command.setProductQuantity(orderQuantity);
-//                    if (producttoPutOnRack.getSellPrice() == null) {
-//                        command.setSellPrice(producttoPutOnRack.getStockPrice() * 1.2);
-//                    }
-//                    putOnRackCellCommands.add(command);
-//
-//                });
 
                 currentWorldResponse = psApiClient.tick(request);
                 if (currentWorldResponse.isGameOver()) {
@@ -167,7 +193,8 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
             while (!currentWorldResponse.isGameOver());
 
             // Если пришел Game Over, значит все время игры закончилось. Пора считать прибыль
-            log.info("Я заработал " + (currentWorldResponse.getIncome() - currentWorldResponse.getSalaryCosts() - currentWorldResponse.getStockCosts()) + "руб.");
+            log.info("Real score = " + (currentWorldResponse.getIncome() - currentWorldResponse.getSalaryCosts() - currentWorldResponse.getStockCosts() + productManager.getRockCost()));
+            log.info("Я заработал " + (currentWorldResponse.getIncome() - currentWorldResponse.getSalaryCosts() - currentWorldResponse.getStockCosts()) + " руб.");
 
         } catch (ApiException e) {
             log.error(e.getMessage(), e);

@@ -18,6 +18,8 @@ public class ProductInfo {
 
     private int inBasket;
 
+    private boolean stopSpam;
+
     public ProductInfo(Integer productId, String productName, double stockPrice) {
         this.productId = productId;
         this.productName = productName;
@@ -27,6 +29,7 @@ public class ProductInfo {
         this.inRack = 0;
         this.inBasket = 0;
         this.sellPrice = stockPrice;
+        stopSpam = false;
     }
 
     public Integer getProductId() {
@@ -81,6 +84,14 @@ public class ProductInfo {
         this.inBasket = inBasket;
     }
 
+    public boolean isStopSpam() {
+        return stopSpam;
+    }
+
+    public void stopSpam() {
+        this.stopSpam = true;
+    }
+
     public int getSold() {
         return getTotalStock() - getInStock() - getInRack() - getInBasket();
     }
@@ -101,13 +112,19 @@ public class ProductInfo {
         return getSold() * (getSellPrice() - getStockPrice());
     }
 
+    public double getTotalInefficiency() {
+        return (getInStock() + getInRack() + getInBasket()) * getStockPrice();
+    }
+
+    public double getManageableInefficiency() {
+        return (getInStock()) * getStockPrice();
+    }
+
     @Override
     public String toString() {
         return "id = " + getProductId() + ", name = " + getProductName() + ", stockPrice = " +
-                getStockPrice() + ", sellPrice = " + getSellPrice() + ", totalStock =" +
+                getStockPrice() + ", sellPrice = " + getSellPrice() + ", totalStock = " +
                 getTotalStock() + ", inStock = " + getInStock() + ", inRack = " + getInRack() +
-                ", inBasket = " + getInBasket() + ", sold = " + getSold() + ", income = " +
-                getIncome() + ", stockCost = " + getStockCost() + ", profit = " + getProfit() +
-                ", soldProfit = " + getSoldProfit();
+                ", inBasket = " + getInBasket() + ", sold = " + getSold();
     }
 }
