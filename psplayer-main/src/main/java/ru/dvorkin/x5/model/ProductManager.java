@@ -30,29 +30,37 @@ public class ProductManager {
         return List.of(42, 29, 26, 17, 27, 13, 39, 21, 22, 24, 23, 32, 31, 41, 40);
     }
 
-    public Integer getQuantityToBuy(int productId, int rackId) {
-        switch (rackId) {
-            case 1:
-            case 2:
-            case 3:
-                return 3700;
-            case 4:
-            case 5:
-            case 6:
-                return 4500;
-            case 7:
-            case 8:
-            case 9:
-                return 5100;
-            case 10:
-            case 11:
-            case 12:
-            case 13:
-            case 14:
-            case 15:
-                return 11400;
-            default:
-                return 11111;
+    public Integer getQuantityToBuy(int productId, int rackId, CurrentWorldResponse world) {
+        ProductInfo info = usedProducts.get(productId);
+        if (info.getSold() == 0) {
+            //TODO: do some updates
+            switch (rackId) {
+                case 1:
+                case 2:
+                case 3:
+                    return 3700;
+                case 4:
+                case 5:
+                case 6:
+                    return 4500;
+                case 7:
+                case 8:
+                case 9:
+                    return 5100;
+                case 10:
+                case 11:
+                case 12:
+                case 13:
+                case 14:
+                case 15:
+                    return 11400;
+                default:
+                    return 11111;
+            }
+        } else {
+            double totalToBuy = ((double) info.getSold() * world.getCurrentTick()) / world.getTickCount();
+            int total = (int)Math.round(totalToBuy);
+            return (total - info.getTotalStock());
         }
     }
 
