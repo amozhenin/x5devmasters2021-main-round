@@ -73,6 +73,7 @@ public class ProductManager {
         int totalSold = 0;
         double totalIneff = 0.0;
         double manageableIneff = 0.0;
+        double rockCost = 0.0;
         for (Integer productId: getUsedProductIds()) {
             ProductInfo info = usedProducts.get(productId);
             log.info(info.toString());
@@ -82,10 +83,12 @@ public class ProductManager {
             totalSold += info.getSold();
             totalIneff += info.getTotalInefficiency();
             manageableIneff += info.getManageableInefficiency();
+            rockCost += info.getStockPrice() * ROCK_QUANTITY;
         }
         log.info("totalSold = " + totalSold);
         log.info("totalIneff = " + totalIneff);
         log.info("manageableIneff = " + manageableIneff);
+        log.info("rockCost = " + rockCost);
     }
 
     public Double getRockCost() {
