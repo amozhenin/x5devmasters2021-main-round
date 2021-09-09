@@ -116,6 +116,16 @@ public class ProductManager {
                 new ProductInfo(productId, product.getName(), product.getStockPrice()));
     }
 
+    public ProductInfo getUnsafeInfoForProductId(Integer productId) {
+        ProductInfo info = usedProducts.get(productId);
+        if (info == null) {
+            log.error("!!!NO INFO for id " + productId);
+            info = new ProductInfo(productId, "DUMB", 0.0);
+            usedProducts.put(productId, info);
+        }
+        return info;
+    }
+
     public void syncWithWorld(CurrentWorldResponse world) {
         for (Integer productId : getUsedProductIds()) {
             Product product = world.getStock().get(productId - 1);
