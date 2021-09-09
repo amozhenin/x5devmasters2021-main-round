@@ -53,7 +53,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 if (currentWorldResponse == null) {
                     currentWorldResponse = psApiClient.loadWorld();
                 }
-                final Integer currentTick = currentWorldResponse.getCurrentTick();
+                final int currentTick = currentWorldResponse.getCurrentTick();
                 employeeManager.syncWithWorld(currentWorldResponse);
                 productManager.syncWithWorld(currentWorldResponse);
                 CurrentTickRequest request = new CurrentTickRequest();
@@ -92,7 +92,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
                 for (Integer productId : productManager.getUsedProductIds()) {
                     Integer rackId = productManager.getRackForProductId(productId);
-                    Integer quantity = productManager.getQuantityToBuy(productId, rackId);
+                    Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
                     Product product = stock.get(productId - 1);
                     if ((product.getInStock() == 0) &&
                             ((currentWorldResponse.getTickCount() - currentTick) > (quantity / employeeManager.getMaxEfficiency()))) {
@@ -102,6 +102,23 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                         buyStockCommands.add(command);
                         productManager.getInfoForProduct(product).addStock(quantity);
                     }
+                }
+
+                if (buyStockCommands.size() > 0) {
+                    log.info("buy, tick =" + currentTick);
+                    for (BuyStockCommand command: buyStockCommands) {
+                        log.info(">>productId = " + command.getProductId() + ", quantity = " + command.getQuantity());
+                    }
+                }
+
+                if ((currentTick == 1) || (currentTick == 1000) || (currentTick == 5000) || (currentTick == 9000) ||
+                        (currentTick == 10000)) {
+                    Integer productId = 42;
+                    Integer rackId = productManager.getRackForProductId(productId);
+                    Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
+                    int totalStock = productManager.getInfoForProduct(currentWorldResponse.getStock().get(productId - 1)).getTotalStock();
+                    log.info(" estimate, tick = " + currentTick + ", productId = " + productId + ", quantity = " +
+                            quantity + ", totalStock = " + totalStock + ", totalEstimate =" + (totalStock + quantity));
                 }
 
                 //adding rock
@@ -116,12 +133,6 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     }
                 }
 
-                if (buyStockCommands.size() > 0) {
-                    log.info("buy, tick =" + currentTick);
-                    for (BuyStockCommand command: buyStockCommands) {
-                        log.info(">>productId = " + command.getProductId() + ", quantity = " + command.getQuantity());
-                    }
-                }
 
                 for (RackCell rack : rackCells) {
                     if (rack.getProductId() == null || rack.getProductQuantity() < rack.getCapacity()) {
@@ -136,44 +147,6 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                         putOnRackCellCommands.add(command);
                     }
                 }
-
-                // Обходим торговый зал и смотрим какие полки пустые. Выставляем на них товар.
-//                currentWorldResponse.getRackCells().stream().filter(rack -> rack.getProductId() == null || rack.getProductQuantity().equals(0)).forEach(rack -> {
-//                    Product producttoPutOnRack = null;
-//                    if (rack.getProductId() == null) {
-//                        List<Integer> productsOnRack = rackCells.stream().filter(r -> r.getProductId() != null).map(RackCell::getProductId).collect(Collectors.toList());
-//                        productsOnRack.addAll(putOnRackCellCommands.stream().map(c -> c.getProductId()).collect(Collectors.toList()));
-//                        producttoPutOnRack = stock.stream().filter(product -> !productsOnRack.contains(product.getId())).findFirst().orElse(null);
-//                    }
-//                    else {
-//                        producttoPutOnRack = stock.stream().filter(product -> product.getId().equals(rack.getProductId())).findFirst().orElse(null);
-//                    }
-//
-//                    Integer productQuantity = rack.getProductQuantity();
-//                    if (productQuantity == null) {
-//                        productQuantity = 0;
-//                    }
-//
-//                    // Вначале закупим товар на склад. Каждый ход закупать товар накладно, но ведь это тестовый игрок.
-//                    Integer orderQuantity = rack.getCapacity() - productQuantity;
-//                    if (producttoPutOnRack.getInStock() < orderQuantity) {
-//                        BuyStockCommand command = new BuyStockCommand();
-//                        command.setProductId(producttoPutOnRack.getId());
-//                        command.setQuantity(10000);
-//                        buyStockCommands.add(command);
-//                    }
-//
-//                    // Далее разложим на полки. И сформируем цену. Накинем 10 рублей к оптовой цене
-//                    PutOnRackCellCommand command = new PutOnRackCellCommand();
-//                    command.setProductId(producttoPutOnRack.getId());
-//                    command.setRackCellId(rack.getId());
-//                    command.setProductQuantity(orderQuantity);
-//                    if (producttoPutOnRack.getSellPrice() == null) {
-//                        command.setSellPrice(producttoPutOnRack.getStockPrice() * 1.2);
-//                    }
-//                    putOnRackCellCommands.add(command);
-//
-//                });
 
                 currentWorldResponse = psApiClient.tick(request);
                 if (currentWorldResponse.isGameOver()) {
