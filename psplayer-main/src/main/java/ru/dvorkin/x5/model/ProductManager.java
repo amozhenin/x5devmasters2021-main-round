@@ -73,7 +73,7 @@ public class ProductManager {
     }
 
     public Double getPercent(int productId) {
-        return 1.209;
+        return 1.208;
     }
 
     public Integer getProductIdForRack(int rackId) {
