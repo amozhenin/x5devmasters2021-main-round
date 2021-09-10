@@ -55,7 +55,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 CurrentTickRequest request = new CurrentTickRequest();
 
                 List<HireEmployeeCommand> hireEmployeeCommands = new ArrayList<>();
-                if ((currentTick == 0) || (currentTick == EmployeeManager.WORK_INTERVAL - 1) || (currentTick == EmployeeManager.REST_INTERVAL - 1)) {
+                if ((currentTick == 0) || (currentTick == EmployeeManager.WORK_INTERVAL) || (currentTick == EmployeeManager.REST_INTERVAL)) {
                     HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
                     hireEmployeeCommand.setCheckoutLineId(1);
                     hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
@@ -83,8 +83,12 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 //                        hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
 //                        hireEmployeeCommands.add(hireEmployeeCommand);
 //                        log.info("hire on " + currentTick);
-                        log.info("no employees, tick = " + currentTick);
-                    } //else do nothing
+                        if (currentTick > 0) {
+                            log.info("no employees, tick = " + currentTick);
+                        }
+                    } else {
+                        log.info("almost ready, tick = " + currentTick);
+                    }
                 });
 
                 request.setOnCheckoutLineCommands(setOnCheckoutLineCommands);

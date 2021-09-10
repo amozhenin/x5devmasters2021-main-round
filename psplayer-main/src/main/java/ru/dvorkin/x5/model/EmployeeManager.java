@@ -17,8 +17,8 @@ public class EmployeeManager {
     private final List<EmployeeInfo> employeeInfo;
     private int noEmployeeOnLineTicksCount;
 
-    public static final int WORK_INTERVAL = 480;
-    public static final int REST_INTERVAL = 960;
+    public static final int WORK_INTERVAL = 479;
+    public static final int REST_INTERVAL = 959;
     private static final int CLOSE_INTERVAL = -5;
 
     public EmployeeManager() {
@@ -164,6 +164,6 @@ public class EmployeeManager {
 
     public boolean aboutToLeave(Integer currentTick, Integer lineId) {
         return employeeInfo.stream().anyMatch(info -> (info.getStatus() == EmployeeStatus.WORKING) &&
-                (info.getLineId().equals(lineId)) && (currentTick - info.getStatusChangeTick() - WORK_INTERVAL + 1 >= 0));
+                (info.getLineId().equals(lineId)) && (currentTick - info.getStatusChangeTick() - WORK_INTERVAL >= 0));
     }
 }
