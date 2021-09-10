@@ -17,8 +17,8 @@ public class EmployeeManager {
     private final List<EmployeeInfo> employeeInfo;
     private int noEmployeeOnLineTicksCount;
 
-    private static final int WORK_INTERVAL = 480;
-    private static final int REST_INTERVAL = 960;
+    public static final int WORK_INTERVAL = 480;
+    public static final int REST_INTERVAL = 960;
     private static final int CLOSE_INTERVAL = -5;
 
     public EmployeeManager() {
