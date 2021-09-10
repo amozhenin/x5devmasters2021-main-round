@@ -55,11 +55,22 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 CurrentTickRequest request = new CurrentTickRequest();
 
                 List<HireEmployeeCommand> hireEmployeeCommands = new ArrayList<>();
+                if ((currentTick == 0) || (currentTick == EmployeeManager.WORK_INTERVAL - 1) || (currentTick == EmployeeManager.REST_INTERVAL - 1)) {
+                    HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
+                    hireEmployeeCommand.setCheckoutLineId(1);
+                    hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
+                    hireEmployeeCommands.add(hireEmployeeCommand);
+                    hireEmployeeCommand = new HireEmployeeCommand();
+                    hireEmployeeCommand.setCheckoutLineId(2);
+                    hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
+                    hireEmployeeCommands.add(hireEmployeeCommand);
+                    log.info("hire 2 on " + currentTick);
+                }
+                request.setHireEmployeeCommands(hireEmployeeCommands);
+
                 List<SetOnCheckoutLineCommand> setOnCheckoutLineCommands = new ArrayList<>();
 
-                // Смотрим на каких кассах нет кассира (либо не был назначен, либо ушел с кассы отдыхать), нанимаем новых кассиров и ставим на эти кассы.
-                // Нанимаем самых опытных!
-                currentWorldResponse.getCheckoutLines().stream().filter(line -> line.getEmployeeId() == null).forEach(line -> {
+                currentWorldResponse.getCheckoutLines().stream().filter(line -> line.getEmployeeId() == null || employeeManager.aboutToLeave(currentTick, line.getId())).forEach(line -> {
                     EmployeeInfo info = employeeManager.findReadyEmployeeForLine(line.getId());
                     if (info != null) {
                         SetOnCheckoutLineCommand command = new SetOnCheckoutLineCommand();
@@ -67,14 +78,15 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                         command.setEmployeeId(info.getEmployeeId());
                         setOnCheckoutLineCommands.add(command);
                     } else if (!employeeManager.aboutToHaveReadyEmployee(currentTick)) {
-                        HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
-                        hireEmployeeCommand.setCheckoutLineId(line.getId());
-                        hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
-                        hireEmployeeCommands.add(hireEmployeeCommand);
-                        log.info("hire on " + currentTick);
+//                        HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
+//                        hireEmployeeCommand.setCheckoutLineId(line.getId());
+//                        hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
+//                        hireEmployeeCommands.add(hireEmployeeCommand);
+//                        log.info("hire on " + currentTick);
+                        log.info("no employees, tick = " + currentTick);
                     } //else do nothing
                 });
-                request.setHireEmployeeCommands(hireEmployeeCommands);
+
                 request.setOnCheckoutLineCommands(setOnCheckoutLineCommands);
 
                 // готовимся закупать товар на склад и выставлять его на полки
