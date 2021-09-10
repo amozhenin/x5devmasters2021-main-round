@@ -149,12 +149,7 @@ public class EmployeeManager {
             return readyList.get(0);
         }
         Optional<EmployeeInfo> infoOpt = readyList.stream().filter(info -> id.equals(info.getLineId())).findFirst();
-        if (infoOpt.isPresent()) {
-            return infoOpt.get();
-        }
-        log.info("diff between null and other line?");
-        return readyList.get(0);
-
+        return infoOpt.orElseGet(() -> readyList.get(0));
     }
 
     public boolean aboutToHaveReadyEmployee(Integer currentTick) {
@@ -164,6 +159,6 @@ public class EmployeeManager {
 
     public boolean aboutToLeave(Integer currentTick, Integer lineId) {
         return employeeInfo.stream().anyMatch(info -> (info.getStatus() == EmployeeStatus.WORKING) &&
-                (info.getLineId().equals(lineId)) && (currentTick - info.getStatusChangeTick() - WORK_INTERVAL >= 0));
+                (info.getLineId().equals(lineId)) && (currentTick - info.getStatusChangeTick() - WORK_INTERVAL + 1 >= 0));
     }
 }
