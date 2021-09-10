@@ -43,6 +43,8 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
         try {
             int cnt = 0;
             boolean stopSpamBuys = false;
+
+            int badTickCounter = 0;
             do {
                 cnt += 1;
 
@@ -55,7 +57,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 CurrentTickRequest request = new CurrentTickRequest();
 
                 List<HireEmployeeCommand> hireEmployeeCommands = new ArrayList<>();
-                if ((currentTick == 0) || (currentTick == EmployeeManager.WORK_INTERVAL) || (currentTick == EmployeeManager.REST_INTERVAL)) {
+//                if ((currentTick == 0) || (currentTick == EmployeeManager.WORK_INTERVAL) || (currentTick == EmployeeManager.REST_INTERVAL)) {
                     HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
                     hireEmployeeCommand.setCheckoutLineId(1);
                     hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
@@ -64,7 +66,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     hireEmployeeCommand.setCheckoutLineId(2);
                     hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
                     hireEmployeeCommands.add(hireEmployeeCommand);
-                }
+//                }
                 request.setHireEmployeeCommands(hireEmployeeCommands);
 
                 List<SetOnCheckoutLineCommand> setOnCheckoutLineCommands = new ArrayList<>();
@@ -78,29 +80,30 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 List<CheckoutLine> lines = currentWorldResponse.getCheckoutLines();
                 long notWorkingLineCount = lines.stream().filter(line -> line.getEmployeeId() == null).count();
                 if (notWorkingLineCount > 0) {
-                    log.info("bad tick = " + currentTick + ", count = " + notWorkingLineCount);
+                    //log.info("bad tick = " + currentTick + ", count = " + notWorkingLineCount);
+                    badTickCounter += notWorkingLineCount;
                 }
 
-                currentWorldResponse.getCheckoutLines().stream().filter(line -> line.getEmployeeId() == null || employeeManager.aboutToLeave(currentTick, line.getId())).forEach(line -> {
-                    EmployeeInfo info = employeeManager.findReadyEmployeeForLine(line.getId());
-                    if (info != null) {
-                        SetOnCheckoutLineCommand command = new SetOnCheckoutLineCommand();
-                        command.setCheckoutLineId(line.getId());
-                        command.setEmployeeId(info.getEmployeeId());
-                        setOnCheckoutLineCommands.add(command);
-                    } else if (!employeeManager.aboutToHaveReadyEmployee(currentTick)) {
-//                        HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
-//                        hireEmployeeCommand.setCheckoutLineId(line.getId());
-//                        hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
-//                        hireEmployeeCommands.add(hireEmployeeCommand);
-//                        log.info("hire on " + currentTick);
-//                        if (currentTick > 0) {
-//                            log.info("no employees, tick = " + currentTick);
-//                        }
-                    } else {
-//                        log.info("almost ready, tick = " + currentTick);
-                    }
-                });
+//                currentWorldResponse.getCheckoutLines().stream().filter(line -> line.getEmployeeId() == null || employeeManager.aboutToLeave(currentTick, line.getId())).forEach(line -> {
+//                    EmployeeInfo info = employeeManager.findReadyEmployeeForLine(line.getId());
+//                    if (info != null) {
+//                        SetOnCheckoutLineCommand command = new SetOnCheckoutLineCommand();
+//                        command.setCheckoutLineId(line.getId());
+//                        command.setEmployeeId(info.getEmployeeId());
+//                        setOnCheckoutLineCommands.add(command);
+//                    } else if (!employeeManager.aboutToHaveReadyEmployee(currentTick)) {
+////                        HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
+////                        hireEmployeeCommand.setCheckoutLineId(line.getId());
+////                        hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
+////                        hireEmployeeCommands.add(hireEmployeeCommand);
+////                        log.info("hire on " + currentTick);
+////                        if (currentTick > 0) {
+////                            log.info("no employees, tick = " + currentTick);
+////                        }
+//                    } else {
+////                        log.info("almost ready, tick = " + currentTick);
+//                    }
+//                });
 
                 request.setOnCheckoutLineCommands(setOnCheckoutLineCommands);
 
@@ -213,9 +216,11 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 if (currentWorldResponse.isGameOver()) {
                     employeeManager.endGameStatusUpdate(currentWorldResponse.getCurrentTick());
                     productManager.syncWithWorld(currentWorldResponse);
-                    employeeManager.printEmployeeStatusStatistic();
+//                    employeeManager.printEmployeeStatusStatistic();
                     productManager.printProductStatistics();
                     printWorldEndData(currentWorldResponse);
+                    log.info("manager bad tick info = " + employeeManager.getNoEmployeeOnLineTicksCount());
+                    log.info("bad tick count = " + badTickCounter);
                 }
             }
             while (!currentWorldResponse.isGameOver());
