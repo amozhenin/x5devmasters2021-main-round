@@ -1,5 +1,7 @@
 package ru.dvorkin.x5.model;
 
+import ru.hilariousstartups.javaskills.psplayer.swagger_codegen.model.Employee;
+
 public class EmployeeInfo {
 
     private final Integer employeeId;
@@ -10,16 +12,28 @@ public class EmployeeInfo {
 
     private Integer lineId;
 
+    private Integer experience;
+
+    private Integer salary;
+
+    private final String firstName;
+
+    private final String lastName;
+
     private int workTicks, restTicks, readyTicks;
 
-    public EmployeeInfo(Integer employeeId, EmployeeStatus status, Integer statusChangeTick, Integer lineId) {
-        this.employeeId = employeeId;
+    public EmployeeInfo(Employee employee, EmployeeStatus status, Integer statusChangeTick, Integer lineId) {
+        this.employeeId = employee.getId();
         this.status = status;
         this.statusChangeTick = statusChangeTick;
         this.lineId = lineId;
         workTicks = 0;
         restTicks = 0;
         readyTicks = 0;
+        this.experience = employee.getExperience();
+        this.salary = employee.getSalary();
+        this.firstName = employee.getFirstName();
+        this.lastName = employee.getLastName();
     }
 
     public Integer getEmployeeId() {
@@ -73,5 +87,29 @@ public class EmployeeInfo {
 
     public void setLineId(Integer lineId) {
         this.lineId = lineId;
+    }
+
+    public String getFirstName() {
+        return this.firstName;
+    }
+
+    public String getLastName() {
+        return this.lastName;
+    }
+
+    public Integer getExperience() {
+        return experience;
+    }
+
+    public Integer getSalary() {
+        return salary;
+    }
+
+    public void setExperience(Integer experience) {
+        this.experience = experience;
+    }
+
+    public void setSalary(Integer salary) {
+        this.salary = salary;
     }
 }

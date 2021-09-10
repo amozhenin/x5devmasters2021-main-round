@@ -61,9 +61,20 @@ public class EmployeeManager {
                 if (info.isEmpty()) {
                     Optional<CheckoutLine> lineOpt = findCheckOutLineByEmployeeId(world, employee.getId());
                     info = lineOpt
-                            .map(checkoutLine -> new EmployeeInfo(employee.getId(), EmployeeStatus.WORKING, currentTick, checkoutLine.getId()))
-                            .or(() -> Optional.of(new EmployeeInfo(employee.getId(), EmployeeStatus.READY_TO_WORK, currentTick, null)));
+                            .map(checkoutLine -> new EmployeeInfo(employee, EmployeeStatus.WORKING, currentTick, checkoutLine.getId()))
+                            .or(() -> Optional.of(new EmployeeInfo(employee, EmployeeStatus.READY_TO_WORK, currentTick, null)));
                     employeeInfo.add(info.get());
+                } else {
+                    EmployeeInfo i = info.get();
+                    //check salary and experience does not change
+                    if (!employee.getExperience().equals(i.getExperience())) {
+                        log.warn("EXPERIENCE CHANGES " + i.getExperience() + "->" + employee.getExperience());
+                        i.setExperience(employee.getExperience());
+                    }
+                    if (!employee.getSalary().equals(i.getSalary())) {
+                        log.warn("SALARY CHANGES " + i.getSalary() + "->" + employee.getSalary());
+                        i.setSalary(employee.getSalary());
+                    }
                 }
             }
         }
@@ -106,7 +117,8 @@ public class EmployeeManager {
         log.info(" # of ticks with lines without employees = " + getNoEmployeeOnLineTicksCount());
         for (EmployeeInfo info : employeeInfo) {
             log.info(" employee #" + info.getEmployeeId() + ", worked = " + info.getWorkTicks() +
-                    ", rested = " + info.getRestTicks() + ", ready = " + info.getReadyTicks());
+                    ", rested = " + info.getRestTicks() + ", ready = " + info.getReadyTicks() + ", experience = " +
+                    info.getExperience());
         }
     }
 
@@ -148,5 +160,10 @@ public class EmployeeManager {
     public boolean aboutToHaveReadyEmployee(Integer currentTick) {
         return employeeInfo.stream().anyMatch(info -> (info.getStatus() == EmployeeStatus.REST) &&
                 (currentTick - info.getStatusChangeTick() - REST_INTERVAL >= CLOSE_INTERVAL));
+    }
+
+    public boolean aboutToLeave(Integer currentTick, Integer lineId) {
+        return employeeInfo.stream().anyMatch(info -> (info.getStatus() == EmployeeStatus.WORKING) &&
+                (info.getLineId().equals(lineId)) && (currentTick - info.getStatusChangeTick() - WORK_INTERVAL + 1 >= 0));
     }
 }
