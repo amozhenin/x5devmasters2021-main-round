@@ -69,10 +69,16 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
                 List<SetOnCheckoutLineCommand> setOnCheckoutLineCommands = new ArrayList<>();
 
-                if (currentTick == 478 || currentTick == 479 || currentTick == 480) {
-                    if (employeeManager.aboutToLeave(currentTick, 1) || employeeManager.aboutToLeave(currentTick, 2)) {
-                        log.info("about to leave on tick " + currentTick);
-                    }
+//                if (currentTick == 478 || currentTick == 479 || currentTick == 480) {
+//                    if (employeeManager.aboutToLeave(currentTick, 1) || employeeManager.aboutToLeave(currentTick, 2)) {
+//                        log.info("about to leave on tick " + currentTick);
+//                    }
+//                }
+
+                List<CheckoutLine> lines = currentWorldResponse.getCheckoutLines();
+                long notWorkingLineCount = lines.stream().filter(line -> line.getEmployeeId() == null).count();
+                if (notWorkingLineCount > 0) {
+                    log.info("bad tick = " + currentTick + ", count = " + notWorkingLineCount);
                 }
 
                 currentWorldResponse.getCheckoutLines().stream().filter(line -> line.getEmployeeId() == null || employeeManager.aboutToLeave(currentTick, line.getId())).forEach(line -> {
@@ -88,11 +94,11 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 //                        hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
 //                        hireEmployeeCommands.add(hireEmployeeCommand);
 //                        log.info("hire on " + currentTick);
-                        if (currentTick > 0) {
-                            log.info("no employees, tick = " + currentTick);
-                        }
+//                        if (currentTick > 0) {
+//                            log.info("no employees, tick = " + currentTick);
+//                        }
                     } else {
-                        log.info("almost ready, tick = " + currentTick);
+//                        log.info("almost ready, tick = " + currentTick);
                     }
                 });
 
