@@ -69,7 +69,11 @@ public class ProductManager {
     }
 
     public Double getSellPrice(int productId, double stockPrice) {
-        return 1.209 * stockPrice;
+         return getPercent(productId) * stockPrice;
+    }
+
+    public Double getPercent(int productId) {
+        return 1.209;
     }
 
     public Integer getProductIdForRack(int rackId) {
@@ -81,6 +85,12 @@ public class ProductManager {
     }
 
     public void printProductStatistics() {
+        log.info("*usedPercents*");
+        StringBuilder sb = new StringBuilder();
+        for (Integer productId: getUsedProductIds()) {
+            sb.append("| id = ").append(productId).append(", % = ").append(getPercent(productId));
+        }
+        log.info(sb.toString());
         log.info("*usedProducts*");
         int totalSold = 0;
         double totalIneff = 0.0;
