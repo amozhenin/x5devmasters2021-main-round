@@ -225,7 +225,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
     }
 
     private void printWorldStartData(CurrentWorldResponse world) {
-        log.info("currentTick = " + world.getCurrentTick() + ", tickCount = " + world.getTickCount());
+//        log.info("currentTick = " + world.getCurrentTick() + ", tickCount = " + world.getTickCount());
 //        printCheckoutLinesInfo(world);
 //        printEmployeesInfo(world);
 //        printOffersInfo(world);
@@ -235,7 +235,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
     }
 
     private void printWorldEndData(CurrentWorldResponse world) {
-        log.info("currentTick = " + world.getCurrentTick() + ", tickCount = " + world.getTickCount());
+//        log.info("currentTick = " + world.getCurrentTick() + ", tickCount = " + world.getTickCount());
 //        printCheckoutLinesInfo(world);
 //        printEmployeesInfo(world);
 //        printOffersInfo(world);
