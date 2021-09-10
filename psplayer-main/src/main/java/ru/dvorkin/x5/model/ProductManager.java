@@ -73,7 +73,32 @@ public class ProductManager {
     }
 
     public Double getPercent(int productId) {
-        return 1.232;
+        Integer rackId = getRackForProductId(productId);
+        switch (rackId) {
+            case 1:
+            case 2:
+            case 3:
+                return 1.2;
+            case 4:
+            case 5:
+            case 6:
+                return 1.2;
+            case 7:
+            case 8:
+            case 9:
+                return 1.2;
+            case 10:
+            case 11:
+            case 12:
+                return 1.207;
+            case 13:
+            case 14:
+            case 15:
+                return 1.232;
+            default:
+                return 1.2;
+
+        }
     }
 
     public Integer getProductIdForRack(int rackId) {
