@@ -70,6 +70,12 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
                 List<SetOnCheckoutLineCommand> setOnCheckoutLineCommands = new ArrayList<>();
 
+                if (currentTick == 478 || currentTick == 479 || currentTick == 480) {
+                    if (employeeManager.aboutToLeave(currentTick, 1) || employeeManager.aboutToLeave(currentTick, 2)) {
+                        log.info("about to leave on tick " + currentTick);
+                    }
+                }
+
                 currentWorldResponse.getCheckoutLines().stream().filter(line -> line.getEmployeeId() == null || employeeManager.aboutToLeave(currentTick, line.getId())).forEach(line -> {
                     EmployeeInfo info = employeeManager.findReadyEmployeeForLine(line.getId());
                     if (info != null) {
