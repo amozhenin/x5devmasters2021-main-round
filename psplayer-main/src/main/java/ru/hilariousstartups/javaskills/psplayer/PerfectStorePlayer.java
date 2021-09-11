@@ -16,7 +16,6 @@ import ru.hilariousstartups.javaskills.psplayer.swagger_codegen.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -57,11 +56,9 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 List<HireEmployeeCommand> hireEmployeeCommands = new ArrayList<>();
                 if ((currentTick == 0) || (currentTick == EmployeeManager.WORK_INTERVAL) || (currentTick == EmployeeManager.REST_INTERVAL)) {
                     HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
-                    hireEmployeeCommand.setCheckoutLineId(1);
                     hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
                     hireEmployeeCommands.add(hireEmployeeCommand);
                     hireEmployeeCommand = new HireEmployeeCommand();
-                    hireEmployeeCommand.setCheckoutLineId(2);
                     hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
                     hireEmployeeCommands.add(hireEmployeeCommand);
                 }
@@ -69,38 +66,80 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
                 List<SetOnCheckoutLineCommand> setOnCheckoutLineCommands = new ArrayList<>();
 
-//                if (currentTick == 478 || currentTick == 479 || currentTick == 480) {
-//                    if (employeeManager.aboutToLeave(currentTick, 1) || employeeManager.aboutToLeave(currentTick, 2)) {
-//                        log.info("about to leave on tick " + currentTick);
-//                    }
-//                }
+                List<SetOffCheckoutLineCommand> setOffCheckoutLineCommands = new ArrayList<>();
 
                 List<CheckoutLine> lines = currentWorldResponse.getCheckoutLines();
+
+                if (currentTick % EmployeeManager.WORK_INTERVAL == 1 && currentTick != 1) {
+                    if (lines.get(0).getEmployeeId() != null) {
+                        SetOffCheckoutLineCommand command = new SetOffCheckoutLineCommand();
+                        command.setEmployeeId(lines.get(0).getEmployeeId());
+                        setOffCheckoutLineCommands.add(command);
+                    }
+                    if (lines.get(1).getEmployeeId() != null) {
+                        SetOffCheckoutLineCommand command = new SetOffCheckoutLineCommand();
+                        command.setEmployeeId(lines.get(1).getEmployeeId());
+                        setOffCheckoutLineCommands.add(command);
+                    }
+                    List<EmployeeInfo> readyList = employeeManager.findReadyEmployees();
+                    if (readyList.size() < 2) {
+                        log.info("something is wrong on tick " + currentTick);
+                    } else {
+                        SetOnCheckoutLineCommand command = new SetOnCheckoutLineCommand();
+                        command.setEmployeeId(readyList.get(0).getEmployeeId());
+                        command.setCheckoutLineId(1);
+                        setOnCheckoutLineCommands.add(command);
+                        command = new SetOnCheckoutLineCommand();
+                        command.setEmployeeId(readyList.get(1).getEmployeeId());
+                        command.setCheckoutLineId(2);
+                        setOnCheckoutLineCommands.add(command);
+                    }
+
+                }
+                if (currentTick == 1) {
+                    List<EmployeeInfo> readyList = employeeManager.findReadyEmployees();
+                    if (readyList.size() < 2) {
+                        log.info("something is wrong on tick " + currentTick);
+                    } else {
+                        SetOnCheckoutLineCommand command = new SetOnCheckoutLineCommand();
+                        command.setEmployeeId(readyList.get(0).getEmployeeId());
+                        command.setCheckoutLineId(1);
+                        setOnCheckoutLineCommands.add(command);
+                        command = new SetOnCheckoutLineCommand();
+                        command.setEmployeeId(readyList.get(1).getEmployeeId());
+                        command.setCheckoutLineId(2);
+                        setOnCheckoutLineCommands.add(command);
+                    }
+                }
+
+                request.setOffCheckoutLineCommands(setOffCheckoutLineCommands);
+                request.setOnCheckoutLineCommands(setOnCheckoutLineCommands);
+
                 long notWorkingLineCount = lines.stream().filter(line -> line.getEmployeeId() == null).count();
                 if (notWorkingLineCount > 0) {
                     log.info("bad tick = " + currentTick + ", count = " + notWorkingLineCount);
                 }
 
-                currentWorldResponse.getCheckoutLines().stream().filter(line -> line.getEmployeeId() == null || employeeManager.aboutToLeave(currentTick, line.getId())).forEach(line -> {
-                    EmployeeInfo info = employeeManager.findReadyEmployeeForLine(line.getId());
-                    if (info != null) {
-                        SetOnCheckoutLineCommand command = new SetOnCheckoutLineCommand();
-                        command.setCheckoutLineId(line.getId());
-                        command.setEmployeeId(info.getEmployeeId());
-                        setOnCheckoutLineCommands.add(command);
-                    } else if (!employeeManager.aboutToHaveReadyEmployee(currentTick)) {
-//                        HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
-//                        hireEmployeeCommand.setCheckoutLineId(line.getId());
-//                        hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
-//                        hireEmployeeCommands.add(hireEmployeeCommand);
-//                        log.info("hire on " + currentTick);
-//                        if (currentTick > 0) {
-//                            log.info("no employees, tick = " + currentTick);
-//                        }
-                    } else {
-//                        log.info("almost ready, tick = " + currentTick);
-                    }
-                });
+//                currentWorldResponse.getCheckoutLines().stream().filter(line -> line.getEmployeeId() == null || employeeManager.aboutToLeave(currentTick, line.getId())).forEach(line -> {
+//                    EmployeeInfo info = employeeManager.findReadyEmployeeForLine(line.getId());
+//                    if (info != null) {
+//                        SetOnCheckoutLineCommand command = new SetOnCheckoutLineCommand();
+//                        command.setCheckoutLineId(line.getId());
+//                        command.setEmployeeId(info.getEmployeeId());
+//                        setOnCheckoutLineCommands.add(command);
+//                    } else if (!employeeManager.aboutToHaveReadyEmployee(currentTick)) {
+////                        HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
+////                        hireEmployeeCommand.setCheckoutLineId(line.getId());
+////                        hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
+////                        hireEmployeeCommands.add(hireEmployeeCommand);
+////                        log.info("hire on " + currentTick);
+////                        if (currentTick > 0) {
+////                            log.info("no employees, tick = " + currentTick);
+////                        }
+//                    } else {
+////                        log.info("almost ready, tick = " + currentTick);
+//                    }
+//                });
 
                 request.setOnCheckoutLineCommands(setOnCheckoutLineCommands);
 
