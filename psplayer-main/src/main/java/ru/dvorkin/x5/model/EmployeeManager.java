@@ -17,8 +17,8 @@ public class EmployeeManager {
     private final List<EmployeeInfo> employeeInfo;
     private int noEmployeeOnLineTicksCount;
 
-    public static final int WORK_INTERVAL = 479;
-    public static final int REST_INTERVAL = 959;
+    public static final int WORK_INTERVAL = 480;
+    public static final int REST_INTERVAL = 960;
     private static final int CLOSE_INTERVAL = -5;
 
     public EmployeeManager() {
@@ -137,28 +137,45 @@ public class EmployeeManager {
         return lineOpt;
     }
 
-    public EmployeeInfo findReadyEmployeeForLine(Integer id) {
+//    public EmployeeInfo findReadyEmployeeForLine(Integer id) {
+//        List<EmployeeInfo> readyList = employeeInfo
+//                .stream()
+//                .filter(info -> info.getStatus() == EmployeeStatus.READY_TO_WORK)
+//                .collect(Collectors.toList());
+//        if (readyList.isEmpty()) {
+//            return null;
+//        }
+//        if (readyList.size() == 1) {
+//            return readyList.get(0);
+//        }
+//        Optional<EmployeeInfo> infoOpt = readyList.stream().filter(info -> id.equals(info.getLineId())).findFirst();
+//        return infoOpt.orElseGet(() -> readyList.get(0));
+//    }
+
+    public List<EmployeeInfo> findReadyEmployees() {
         List<EmployeeInfo> readyList = employeeInfo
                 .stream()
                 .filter(info -> info.getStatus() == EmployeeStatus.READY_TO_WORK)
                 .collect(Collectors.toList());
-        if (readyList.isEmpty()) {
-            return null;
-        }
-        if (readyList.size() == 1) {
-            return readyList.get(0);
-        }
-        Optional<EmployeeInfo> infoOpt = readyList.stream().filter(info -> id.equals(info.getLineId())).findFirst();
-        return infoOpt.orElseGet(() -> readyList.get(0));
+        return readyList;
+//        if (readyList.isEmpty()) {
+//            return null;
+//        }
+//        if (readyList.size() == 1) {
+//            return readyList.get(0);
+//        }
+//        Optional<EmployeeInfo> infoOpt = readyList.stream().filter(info -> id.equals(info.getLineId())).findFirst();
+//        return infoOpt.orElseGet(() -> readyList.get(0));
     }
 
-    public boolean aboutToHaveReadyEmployee(Integer currentTick) {
-        return employeeInfo.stream().anyMatch(info -> (info.getStatus() == EmployeeStatus.REST) &&
-                (currentTick - info.getStatusChangeTick() - REST_INTERVAL >= CLOSE_INTERVAL));
-    }
 
-    public boolean aboutToLeave(Integer currentTick, Integer lineId) {
-        return employeeInfo.stream().anyMatch(info -> (info.getStatus() == EmployeeStatus.WORKING) &&
-                (info.getLineId().equals(lineId)) && (currentTick - info.getStatusChangeTick() - WORK_INTERVAL + 1 >= 0));
-    }
+//    public boolean aboutToHaveReadyEmployee(Integer currentTick) {
+//        return employeeInfo.stream().anyMatch(info -> (info.getStatus() == EmployeeStatus.REST) &&
+//                (currentTick - info.getStatusChangeTick() - REST_INTERVAL >= CLOSE_INTERVAL));
+//    }
+//
+//    public boolean aboutToLeave(Integer currentTick, Integer lineId) {
+//        return employeeInfo.stream().anyMatch(info -> (info.getStatus() == EmployeeStatus.WORKING) &&
+//                (info.getLineId().equals(lineId)) && (currentTick - info.getStatusChangeTick() - WORK_INTERVAL + 1 >= 0));
+//    }
 }
