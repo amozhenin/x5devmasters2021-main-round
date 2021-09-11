@@ -52,7 +52,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     currentWorldResponse = psApiClient.loadWorld();
                 }
                 final int currentTick = currentWorldResponse.getCurrentTick();
-                employeeManager.syncWithWorld(currentWorldResponse);
+//                employeeManager.syncWithWorld(currentWorldResponse);
                 productManager.syncWithWorld(currentWorldResponse);
                 CurrentTickRequest request = new CurrentTickRequest();
 
@@ -69,13 +69,13 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 //                }
                 request.setHireEmployeeCommands(hireEmployeeCommands);
 
-                List<FireEmployeeCommand> fireEmployeeCommands = new ArrayList<>();
-                for (Employee employee : currentWorldResponse.getEmployees()) {
-                    FireEmployeeCommand command = new FireEmployeeCommand();
-                    command.setEmployeeId(employee.getId());
-                    fireEmployeeCommands.add(command);
-                }
-                request.setFireEmployeeCommands(fireEmployeeCommands);
+//                List<FireEmployeeCommand> fireEmployeeCommands = new ArrayList<>();
+//                for (Employee employee : currentWorldResponse.getEmployees()) {
+//                    FireEmployeeCommand command = new FireEmployeeCommand();
+//                    command.setEmployeeId(employee.getId());
+//                    fireEmployeeCommands.add(command);
+//                }
+//                request.setFireEmployeeCommands(fireEmployeeCommands);
 
                 List<SetOnCheckoutLineCommand> setOnCheckoutLineCommands = new ArrayList<>();
 
@@ -222,12 +222,13 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
                 currentWorldResponse = psApiClient.tick(request);
                 if (currentWorldResponse.isGameOver()) {
-                    employeeManager.endGameStatusUpdate(currentWorldResponse.getCurrentTick());
+//                    employeeManager.endGameStatusUpdate(currentWorldResponse.getCurrentTick());
                     productManager.syncWithWorld(currentWorldResponse);
 //                    employeeManager.printEmployeeStatusStatistic();
                     productManager.printProductStatistics();
                     printWorldEndData(currentWorldResponse);
-                    log.info("manager bad tick info = " + employeeManager.getNoEmployeeOnLineTicksCount());
+//                    log.info("manager bad tick info = " + employeeManager.getNoEmployeeOnLineTicksCount());
+                    log.info("employees = " + currentWorldResponse.getEmployees().size());
                     log.info("bad tick count = " + badTickCounter);
                 }
             }
