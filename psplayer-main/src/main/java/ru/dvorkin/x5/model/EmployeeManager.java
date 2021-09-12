@@ -260,11 +260,11 @@ public class EmployeeManager {
     }
 
     public int getHireBatch() {
-        return 100;
+        return 150;
     }
 
     private int getThreshold() {
-        return 99;
+        return 100;
     }
 
 }
