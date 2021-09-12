@@ -57,6 +57,8 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 List<HireEmployeeCommand> hireEmployeeCommands = new ArrayList<>();
                 List<SetOnCheckoutLineCommand> setOnCheckoutLineCommands = new ArrayList<>();
 
+                List<FireEmployeeCommand> fireEmployeeCommands = new ArrayList<>();
+
                 // Смотрим на каких кассах нет кассира (либо не был назначен, либо ушел с кассы отдыхать), нанимаем новых кассиров и ставим на эти кассы.
                 // Нанимаем самых опытных!
                 currentWorldResponse.getCheckoutLines().stream().filter(line -> line.getEmployeeId() == null).forEach(line -> {
@@ -75,6 +77,19 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 });
                 request.setHireEmployeeCommands(hireEmployeeCommands);
                 request.setOnCheckoutLineCommands(setOnCheckoutLineCommands);
+
+                if (currentTick == 10) {
+                    HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
+                    hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
+                    hireEmployeeCommands.add(hireEmployeeCommand);
+                }
+
+                if (currentTick == 15) {
+                    FireEmployeeCommand command = new FireEmployeeCommand();
+                    command.setEmployeeId(3);
+                    fireEmployeeCommands.add(command);
+                }
+                request.setFireEmployeeCommands(fireEmployeeCommands);
 
                 // готовимся закупать товар на склад и выставлять его на полки
                 ArrayList<BuyStockCommand> buyStockCommands = new ArrayList<>();
