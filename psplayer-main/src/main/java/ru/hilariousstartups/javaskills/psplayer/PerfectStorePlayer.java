@@ -56,7 +56,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 List<FireEmployeeCommand> fireEmployeeCommands = new ArrayList<>();
 
                 if (!employeeManager.isGoodTeamFilled()) {
-                    for (int i = 0; i <= employeeManager.getHireBatch(); i++) {
+                    for (int i = 0; i < employeeManager.getHireBatch(); i++) {
                         HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
                         hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
                         hireEmployeeCommands.add(hireEmployeeCommand);
