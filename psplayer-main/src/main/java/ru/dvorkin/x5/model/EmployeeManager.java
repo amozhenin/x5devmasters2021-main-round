@@ -106,54 +106,56 @@ public class EmployeeManager {
             }
         }
         //decision making
-        List<EmployeeInfo> staging = new ArrayList<>();
-        for (EmployeeInfo info : newList) {
-            if (info.getExperience() < getThreshold()) {
-                toFireTeam.add(info);
-                info.setFireTick(currentTick);
-            } else {
-                staging.add(info);
+        if (!newList.isEmpty()) {
+            List<EmployeeInfo> staging = new ArrayList<>();
+            for (EmployeeInfo info : newList) {
+                if (info.getExperience() < getThreshold()) {
+                    toFireTeam.add(info);
+                    info.setFireTick(currentTick);
+                } else {
+                    staging.add(info);
+                }
             }
-        }
-        //no firing on good team (yet)
-        log.info("staging started, size = " + staging.size());
-        int needed = BEST_TEAM_SIZE - goodTeam.size();
-        if (staging.size() > needed) {
-            staging.sort((a, b) -> b.getExperience() - a.getExperience());
-            while (staging.size() > needed) {
-                EmployeeInfo info = staging.remove(needed);
-                info.setFireTick(currentTick);
-                toFireTeam.add(info);
+            //no firing on good team (yet)
+            log.info("staging started, size = " + staging.size());
+            int needed = BEST_TEAM_SIZE - goodTeam.size();
+            if (staging.size() > needed) {
+                staging.sort((a, b) -> b.getExperience() - a.getExperience());
+                while (staging.size() > needed) {
+                    EmployeeInfo info = staging.remove(needed);
+                    info.setFireTick(currentTick);
+                    toFireTeam.add(info);
+                }
             }
-        }
-        log.info("staging ended, size = " + staging.size());
-        //adding to the good team
-        for (EmployeeInfo info : staging) {
-            goodTeam.add(info);
-            if (nextOnLine1 == null) {
-                nextOnLine1 = info;
-                info.setNextShotTick(currentTick);
-                info.setLineId(1);
-            } else if (nextOnLine2 == null) {
-                nextOnLine2 = info;
-                info.setNextShotTick(currentTick);
-                info.setLineId(2);
-            } else if (restingOnLine1 == null) {
-                restingOnLine1 = info;
-                info.setLineId(1);
-                info.setNextShotTick(currentTick + WORK_INTERVAL - 5);
-            } else if (restingOnLine2 == null) {
-                restingOnLine2 = info;
-                info.setLineId(2);
-                info.setNextShotTick(currentTick + WORK_INTERVAL - 5);
-            } else if (workingOnLine1 == null) {
-                workingOnLine1 = info;
-                info.setLineId(1); //kinda working
-                info.setNextShotTick(currentTick + REST_INTERVAL - 5);
-            } else if (workingOnLine2 == null) {
-                workingOnLine2 = info;
-                info.setLineId(2); //kinda working
-                info.setNextShotTick(currentTick + REST_INTERVAL - 5);
+            log.info("staging ended, size = " + staging.size());
+            //adding to the good team
+            for (EmployeeInfo info : staging) {
+                goodTeam.add(info);
+                if (nextOnLine1 == null) {
+                    nextOnLine1 = info;
+                    info.setNextShotTick(currentTick);
+                    info.setLineId(1);
+                } else if (nextOnLine2 == null) {
+                    nextOnLine2 = info;
+                    info.setNextShotTick(currentTick);
+                    info.setLineId(2);
+                } else if (restingOnLine1 == null) {
+                    restingOnLine1 = info;
+                    info.setLineId(1);
+                    info.setNextShotTick(currentTick + WORK_INTERVAL - 5);
+                } else if (restingOnLine2 == null) {
+                    restingOnLine2 = info;
+                    info.setLineId(2);
+                    info.setNextShotTick(currentTick + WORK_INTERVAL - 5);
+                } else if (workingOnLine1 == null) {
+                    workingOnLine1 = info;
+                    info.setLineId(1); //kinda working
+                    info.setNextShotTick(currentTick + REST_INTERVAL - 5);
+                } else if (workingOnLine2 == null) {
+                    workingOnLine2 = info;
+                    info.setLineId(2); //kinda working
+                    info.setNextShotTick(currentTick + REST_INTERVAL - 5);
+                }
             }
         }
         //update fired employees

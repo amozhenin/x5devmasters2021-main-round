@@ -40,17 +40,15 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
         CurrentWorldResponse currentWorldResponse = awaitServer(psApiClient);
         try {
-            int cnt = 0;
             boolean stopSpamBuys = false;
             do {
-                cnt += 1;
-
                 if (currentWorldResponse == null) {
                     currentWorldResponse = psApiClient.loadWorld();
                 }
                 final int currentTick = currentWorldResponse.getCurrentTick();
                 employeeManager.syncWithWorld(currentWorldResponse);
                 productManager.syncWithWorld(currentWorldResponse);
+                log.info("tick = " + currentTick + ", sync is done");
                 CurrentTickRequest request = new CurrentTickRequest();
 
                 List<HireEmployeeCommand> hireEmployeeCommands = new ArrayList<>();
