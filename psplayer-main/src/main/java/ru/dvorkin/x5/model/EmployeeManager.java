@@ -61,8 +61,8 @@ public class EmployeeManager {
                 if (info.isEmpty()) {
                     Optional<CheckoutLine> lineOpt = findCheckOutLineByEmployeeId(world, employee.getId());
                     info = lineOpt
-                            .map(checkoutLine -> new EmployeeInfo(employee.getId(), EmployeeStatus.WORKING, currentTick, checkoutLine.getId()))
-                            .or(() -> Optional.of(new EmployeeInfo(employee.getId(), EmployeeStatus.READY_TO_WORK, currentTick, null)));
+                            .map(checkoutLine -> new EmployeeInfo(employee, EmployeeStatus.WORKING, currentTick, checkoutLine.getId()))
+                            .or(() -> Optional.of(new EmployeeInfo(employee, EmployeeStatus.READY_TO_WORK, currentTick, null)));
                     employeeInfo.add(info.get());
                 }
             }
@@ -106,7 +106,8 @@ public class EmployeeManager {
         log.info(" # of ticks with lines without employees = " + getNoEmployeeOnLineTicksCount());
         for (EmployeeInfo info : employeeInfo) {
             log.info(" employee #" + info.getEmployeeId() + ", worked = " + info.getWorkTicks() +
-                    ", rested = " + info.getRestTicks() + ", ready = " + info.getReadyTicks());
+                    ", rested = " + info.getRestTicks() + ", ready = " + info.getReadyTicks() + ", experience = " +
+                    info.getExperience());
         }
     }
 
