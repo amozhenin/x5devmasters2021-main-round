@@ -16,7 +16,6 @@ import ru.hilariousstartups.javaskills.psplayer.swagger_codegen.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -78,27 +77,9 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 request.setHireEmployeeCommands(hireEmployeeCommands);
                 request.setOnCheckoutLineCommands(setOnCheckoutLineCommands);
 
-                if (currentTick == 10) {
-                    HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
-                    hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
-                    hireEmployeeCommands.add(hireEmployeeCommand);
-                }
-
-                if (currentTick == 12) {
-                    FireEmployeeCommand command = new FireEmployeeCommand();
-                    command.setEmployeeId(3);
-                    fireEmployeeCommands.add(command);
-                }
                 request.setFireEmployeeCommands(fireEmployeeCommands);
 
-                if (currentTick == 15) {
-                    log.info("emp = " + currentWorldResponse.getEmployees().size());
-                    for (Employee employee : currentWorldResponse.getEmployees()) {
-                        log.info(">" + employee.getId());
-                    }
-                }
-
-                // готовимся закупать товар на склад и выставлять его на полки
+                 // готовимся закупать товар на склад и выставлять его на полки
                 ArrayList<BuyStockCommand> buyStockCommands = new ArrayList<>();
                 request.setBuyStockCommands(buyStockCommands);
 
@@ -162,18 +143,6 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                         }
                     }
                 }
-
-//                if ((currentTick == 1000) || (currentTick == 5000) || (currentTick == 9000) ||
-//                        (currentTick == 10000)) {
-//                    Integer productId = 42;
-//                    Integer rackId = productManager.getRackForProductId(productId);
-//                    Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
-//                    ProductInfo info = productManager.getUnsafeInfoForProductId(productId);
-//                    int totalStock = info.getTotalStock();
-//                    log.info(" estimate, tick = " + currentTick + ", productId = " + productId + ", quantity = " +
-//                            quantity + ", totalEstimate =" + (totalStock + quantity) + ", sold =" + info.getSold());
-//                }
-
 
                 //adding rock
                 if (currentTick == currentWorldResponse.getTickCount() - 5 && productManager.isRockEnabled()) {
