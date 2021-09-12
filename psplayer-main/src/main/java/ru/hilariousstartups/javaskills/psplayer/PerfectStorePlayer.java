@@ -58,7 +58,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 List<SetOnCheckoutLineCommand> setOnCheckoutLineCommands = new ArrayList<>();
 
                 if (currentTick <= 10) {
-                    printCheckoutLinesInfo(currentWorldResponse);
+                    printCustomersInfo(currentWorldResponse);
                 }
 
                 // Смотрим на каких кассах нет кассира (либо не был назначен, либо ушел с кассы отдыхать), нанимаем новых кассиров и ставим на эти кассы.
