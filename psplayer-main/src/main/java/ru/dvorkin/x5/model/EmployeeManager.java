@@ -55,7 +55,7 @@ public class EmployeeManager {
     }
 
     private int getThreshold() {
-        return 90;
+        return 95;
     }
 
     public boolean isGoodTeamFilled() {
