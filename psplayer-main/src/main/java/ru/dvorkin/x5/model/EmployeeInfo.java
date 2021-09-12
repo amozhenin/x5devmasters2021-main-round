@@ -22,6 +22,11 @@ public class EmployeeInfo {
 
     private int workTicks, restTicks, readyTicks;
 
+    //planned fire tick
+    private Integer fireTick;
+
+    private Integer nextShotTick;
+
     public EmployeeInfo(Employee employee, EmployeeStatus status, Integer statusChangeTick, Integer lineId) {
         this.employeeId = employee.getId();
         this.status = status;
@@ -34,7 +39,8 @@ public class EmployeeInfo {
         this.salary = employee.getSalary();
         this.firstName = employee.getFirstName();
         this.lastName = employee.getLastName();
-
+        this.fireTick = null;
+        this.nextShotTick = null;
     }
 
     public Integer getEmployeeId() {
@@ -106,5 +112,21 @@ public class EmployeeInfo {
 
     public String getLastName() {
         return lastName;
+    }
+
+    public Integer getFireTick() {
+        return fireTick;
+    }
+
+    public void setFireTick(Integer fireTick) {
+        this.fireTick = fireTick;
+    }
+
+    public Integer getNextShotTick() {
+        return nextShotTick;
+    }
+
+    public void setNextShotTick(Integer nextShotTick) {
+        this.nextShotTick = nextShotTick;
     }
 }

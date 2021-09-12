@@ -58,22 +58,48 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
                 List<FireEmployeeCommand> fireEmployeeCommands = new ArrayList<>();
 
-                // Смотрим на каких кассах нет кассира (либо не был назначен, либо ушел с кассы отдыхать), нанимаем новых кассиров и ставим на эти кассы.
-                // Нанимаем самых опытных!
-                currentWorldResponse.getCheckoutLines().stream().filter(line -> line.getEmployeeId() == null).forEach(line -> {
-                    EmployeeInfo info = employeeManager.findReadyEmployeeForLine(line.getId());
-                    if (info != null) {
-                        SetOnCheckoutLineCommand command = new SetOnCheckoutLineCommand();
-                        command.setCheckoutLineId(line.getId());
-                        command.setEmployeeId(info.getEmployeeId());
-                        setOnCheckoutLineCommands.add(command);
-                    } else if (!employeeManager.aboutToHaveReadyEmployee(currentTick)) {
+                if (!employeeManager.isGoodTeamFilled()) {
+                    for (int i = 0; i <= employeeManager.getHireBatch(); i++) {
                         HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
-                        hireEmployeeCommand.setCheckoutLineId(line.getId());
                         hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
                         hireEmployeeCommands.add(hireEmployeeCommand);
-                    } //else do nothing
-                });
+                    }
+                }
+
+                for (EmployeeInfo info : employeeManager.getToFireTeam()) {
+                    if (info.getFireTick() <= currentTick) {
+                        FireEmployeeCommand command = new FireEmployeeCommand();
+                        command.setEmployeeId(info.getEmployeeId());
+                        fireEmployeeCommands.add(command);
+                    }
+                }
+
+                for (EmployeeInfo info : employeeManager.getGoodTeam()) {
+                    if (info.getNextShotTick() <= currentTick) {
+                        SetOnCheckoutLineCommand command = new SetOnCheckoutLineCommand();
+                        command.setCheckoutLineId(info.getLineId());
+                        command.setEmployeeId(info.getEmployeeId());
+                        setOnCheckoutLineCommands.add(command);
+                    }
+                }
+
+                // Смотрим на каких кассах нет кассира (либо не был назначен, либо ушел с кассы отдыхать), нанимаем новых кассиров и ставим на эти кассы.
+                // Нанимаем самых опытных!
+//                currentWorldResponse.getCheckoutLines().stream().filter(line -> line.getEmployeeId() == null).forEach(line -> {
+//                    EmployeeInfo info = employeeManager.findReadyEmployeeForLine(line.getId());
+//                    if (info != null) {
+//                        SetOnCheckoutLineCommand command = new SetOnCheckoutLineCommand();
+//                        command.setCheckoutLineId(line.getId());
+//                        command.setEmployeeId(info.getEmployeeId());
+//                        setOnCheckoutLineCommands.add(command);
+//                    } else if (!employeeManager.aboutToHaveReadyEmployee(currentTick)) {
+//                        HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
+//                        hireEmployeeCommand.setCheckoutLineId(line.getId());
+//                        hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
+//                        hireEmployeeCommands.add(hireEmployeeCommand);
+//                    } //else do nothing
+//                });
+
                 request.setHireEmployeeCommands(hireEmployeeCommands);
                 request.setOnCheckoutLineCommands(setOnCheckoutLineCommands);
 
