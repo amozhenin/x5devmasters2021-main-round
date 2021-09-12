@@ -57,6 +57,10 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 List<HireEmployeeCommand> hireEmployeeCommands = new ArrayList<>();
                 List<SetOnCheckoutLineCommand> setOnCheckoutLineCommands = new ArrayList<>();
 
+                if (currentTick <= 10) {
+                    printCheckoutLinesInfo(currentWorldResponse);
+                }
+
                 // Смотрим на каких кассах нет кассира (либо не был назначен, либо ушел с кассы отдыхать), нанимаем новых кассиров и ставим на эти кассы.
                 // Нанимаем самых опытных!
                 currentWorldResponse.getCheckoutLines().stream().filter(line -> line.getEmployeeId() == null).forEach(line -> {
@@ -234,7 +238,6 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
     }
 
     private void printWorldEndData(CurrentWorldResponse world) {
-        log.info("currentTick = " + world.getCurrentTick() + ", tickCount = " + world.getTickCount());
 //        printCheckoutLinesInfo(world);
 //        printEmployeesInfo(world);
 //        printOffersInfo(world);
@@ -271,10 +274,32 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
     }
 
     private void printCustomersInfo(CurrentWorldResponse world) {
-        log.info("customers = " + world.getCustomers().size());
+        log.info("tick = " + world.getCurrentTick() + ", customers = " + world.getCustomers().size());
+        int in_hall = 0;
+        int wait_checkout = 0;
+        int at_checkout = 0;
+        int in_hall_size = 0;
+        int wait_checkout_size = 0;
+        int at_checkout_size = 0;
         for (Customer customer : world.getCustomers()) {
-            log.info("id = " + customer.getId() + ", mode = " + customer.getMode() + ", goods = " + customer.getBasket().size());
+            switch (customer.getMode()) {
+                case IN_HALL:
+                    in_hall++;
+                    in_hall_size += customer.getBasket().size();
+                    break;
+                case AT_CHECKOUT:
+                    at_checkout++;
+                    at_checkout_size += customer.getBasket().size();
+                    break;
+                case WAIT_CHECKOUT:
+                    wait_checkout++;
+                    wait_checkout_size += customer.getBasket().size();
+                    break;
+            }
         }
+        log.info("IN HALL =" + in_hall + ", total basket size = " + in_hall_size);
+        log.info("AT CHECKOUT =" + at_checkout + ", total basket size = " + at_checkout_size);
+        log.info("WAIT_CHECKOUT =" + wait_checkout + ", total basket size = " + wait_checkout_size);
     }
 
     private void printEmployeesInfo(CurrentWorldResponse world) {
