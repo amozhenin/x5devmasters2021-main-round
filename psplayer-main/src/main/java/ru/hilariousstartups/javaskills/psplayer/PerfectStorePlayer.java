@@ -91,6 +91,13 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 }
                 request.setFireEmployeeCommands(fireEmployeeCommands);
 
+                if (currentTick == 15) {
+                    log.info("emp = " + currentWorldResponse.getEmployees().size());
+                    for (Employee employee : currentWorldResponse.getEmployees()) {
+                        log.info(">" + employee.getId());
+                    }
+                }
+
                 // готовимся закупать товар на склад и выставлять его на полки
                 ArrayList<BuyStockCommand> buyStockCommands = new ArrayList<>();
                 request.setBuyStockCommands(buyStockCommands);
