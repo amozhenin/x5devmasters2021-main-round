@@ -32,7 +32,8 @@ public class ProductManager {
 
     public Integer getQuantityToBuy(int productId, int rackId, CurrentWorldResponse world) {
         ProductInfo info = usedProducts.get(productId);
-        if (info.getSold() == 0 && world.getCurrentTick() == 0) {
+        int currentTick = world.getCurrentTick();
+        if (info.getSold() == 0 && currentTick == 0) {
             //TODO: do some updates
             switch (rackId) {
                 case 1:
@@ -61,6 +62,8 @@ public class ProductManager {
                 default:
                     return 11111;
             }
+        } else if (world.getTickCount() - currentTick < 150) {
+            return 0;
         } else {
             double totalToBuy = ((double) info.getSold() * world.getTickCount()) / world.getCurrentTick();
             int total = (int)Math.round(totalToBuy);
