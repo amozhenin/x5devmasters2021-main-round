@@ -32,7 +32,7 @@ public class ProductManager {
 
     public Integer getQuantityToBuy(int productId, int rackId, CurrentWorldResponse world) {
         ProductInfo info = usedProducts.get(productId);
-        if (info.getSold() == 0) {
+        if (info.getSold() == 0 && world.getCurrentTick() == 0) {
             //TODO: do some updates
             switch (rackId) {
                 case 1:
