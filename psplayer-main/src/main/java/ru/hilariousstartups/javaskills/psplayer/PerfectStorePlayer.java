@@ -84,7 +84,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     hireEmployeeCommands.add(hireEmployeeCommand);
                 }
 
-                if (currentTick == 15) {
+                if (currentTick == 12) {
                     FireEmployeeCommand command = new FireEmployeeCommand();
                     command.setEmployeeId(3);
                     fireEmployeeCommands.add(command);
