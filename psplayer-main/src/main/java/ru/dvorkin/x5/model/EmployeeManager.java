@@ -50,26 +50,36 @@ public class EmployeeManager {
     public void syncWithWorld(CurrentWorldResponse world) {
         Integer currentTick = world.getCurrentTick();
         List<Employee> employeeList = world.getEmployees();
-        if (employeeList.size() > employeeInfo.size()) {
-            //add new employees
-            for (Employee employee : employeeList) {
-                Optional<EmployeeInfo> info =
-                        employeeInfo
-                                .stream()
-                                .filter(data -> data.getEmployeeId().equals(employee.getId()))
-                                .findFirst();
-                if (info.isEmpty()) {
-                    Optional<CheckoutLine> lineOpt = findCheckOutLineByEmployeeId(world, employee.getId());
-                    info = lineOpt
-                            .map(checkoutLine -> new EmployeeInfo(employee.getId(), EmployeeStatus.WORKING, currentTick, checkoutLine.getId()))
-                            .or(() -> Optional.of(new EmployeeInfo(employee.getId(), EmployeeStatus.READY_TO_WORK, currentTick, null)));
-                    employeeInfo.add(info.get());
-                }
+        //add new employees
+        for (Employee employee : employeeList) {
+            Optional<EmployeeInfo> info =
+                    employeeInfo
+                            .stream()
+                            .filter(data -> data.getEmployeeId().equals(employee.getId()))
+                            .findFirst();
+            if (info.isEmpty()) {
+                Optional<CheckoutLine> lineOpt = findCheckOutLineByEmployeeId(world, employee.getId());
+                info = lineOpt
+                        .map(checkoutLine -> new EmployeeInfo(employee, EmployeeStatus.WORKING, currentTick, checkoutLine.getId()))
+                        .or(() -> Optional.of(new EmployeeInfo(employee, EmployeeStatus.READY_TO_WORK, currentTick, null)));
+                employeeInfo.add(info.get());
             }
         }
         for (EmployeeInfo info : employeeInfo) {
+            if (info.getStatus() == EmployeeStatus.FIRED || info.getStatus() == EmployeeStatus.GAME_OVER) {
+                continue;
+            }
+            Optional<Employee> eOpt = employeeList.stream().filter(e -> e.getId().equals(info.getEmployeeId())).findFirst();
+            if (eOpt.isEmpty()) {
+                info.setStatus(EmployeeStatus.FIRED, currentTick);
+            }
+        }
+        for (EmployeeInfo info : employeeInfo) {
+            if (info.getStatus() == EmployeeStatus.FIRED || info.getStatus() == EmployeeStatus.GAME_OVER) {
+                continue;
+            }
             Optional<CheckoutLine> lineOpt = findCheckOutLineByEmployeeId(world, info.getEmployeeId());
-            switch(info.getStatus()) {
+            switch (info.getStatus()) {
                 case WORKING:
                     if (lineOpt.isEmpty()) {
                         info.setStatus(EmployeeStatus.REST, currentTick);
@@ -106,12 +116,16 @@ public class EmployeeManager {
         log.info(" # of ticks with lines without employees = " + getNoEmployeeOnLineTicksCount());
         for (EmployeeInfo info : employeeInfo) {
             log.info(" employee #" + info.getEmployeeId() + ", worked = " + info.getWorkTicks() +
-                    ", rested = " + info.getRestTicks() + ", ready = " + info.getReadyTicks());
+                    ", rested = " + info.getRestTicks() + ", ready = " + info.getReadyTicks() + ", experience = " +
+                    info.getExperience() + ", status = " + info.getStatus() + ", setOn = " + info.getStatusChangeTick());
         }
     }
 
     public void endGameStatusUpdate(Integer currentTick) {
         for (EmployeeInfo info : employeeInfo) {
+            if (info.getStatus() == EmployeeStatus.FIRED || info.getStatus() == EmployeeStatus.GAME_OVER) {
+                continue;
+            }
             info.setStatus(EmployeeStatus.GAME_OVER, currentTick);
         }
     }
