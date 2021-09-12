@@ -38,17 +38,17 @@ public class ProductManager {
                 case 1:
                 case 2:
                 case 3:
-                    return 3000;
+                    return 500;
                     //return 3700;
                 case 4:
                 case 5:
                 case 6:
-                    return 3500;
+                    return 1500;
                     //return 4500;
                 case 7:
                 case 8:
                 case 9:
-                    return 4400;
+                    return 2000;
                     //return 5100;
                 case 10:
                 case 11:
@@ -69,7 +69,36 @@ public class ProductManager {
     }
 
     public Double getSellPrice(int productId, double stockPrice) {
-        return 1.2 * stockPrice;
+         return getPercent(productId) * stockPrice;
+    }
+
+    public Double getPercent(int productId) {
+        Integer rackId = getRackForProductId(productId);
+        switch (rackId) {
+            case 1:
+            case 2:
+            case 3:
+                return 1.4;
+            case 4:
+            case 5:
+            case 6:
+                return 1.35;
+            case 7:
+            case 8:
+            case 9:
+                return 1.3;
+            case 10:
+            case 11:
+            case 12:
+                return 1.207;
+            case 13:
+            case 14:
+            case 15:
+                return 1.232;
+            default:
+                return 1.2;
+
+        }
     }
 
     public Integer getProductIdForRack(int rackId) {
@@ -81,6 +110,12 @@ public class ProductManager {
     }
 
     public void printProductStatistics() {
+        log.info("*usedPercents*");
+        StringBuilder sb = new StringBuilder();
+        for (Integer productId: getUsedProductIds()) {
+            sb.append("| id = ").append(productId).append(", % = ").append(getPercent(productId));
+        }
+        log.info(sb.toString());
         log.info("*usedProducts*");
         int totalSold = 0;
         double totalIneff = 0.0;

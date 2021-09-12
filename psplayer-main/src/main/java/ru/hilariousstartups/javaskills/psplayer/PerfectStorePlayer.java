@@ -16,7 +16,6 @@ import ru.hilariousstartups.javaskills.psplayer.swagger_codegen.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -41,11 +40,8 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
         CurrentWorldResponse currentWorldResponse = awaitServer(psApiClient);
         try {
-            int cnt = 0;
             boolean stopSpamBuys = false;
             do {
-                cnt += 1;
-
                 if (currentWorldResponse == null) {
                     currentWorldResponse = psApiClient.loadWorld();
                 }
@@ -57,26 +53,58 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 List<HireEmployeeCommand> hireEmployeeCommands = new ArrayList<>();
                 List<SetOnCheckoutLineCommand> setOnCheckoutLineCommands = new ArrayList<>();
 
-                // Смотрим на каких кассах нет кассира (либо не был назначен, либо ушел с кассы отдыхать), нанимаем новых кассиров и ставим на эти кассы.
-                // Нанимаем самых опытных!
-                currentWorldResponse.getCheckoutLines().stream().filter(line -> line.getEmployeeId() == null).forEach(line -> {
-                    EmployeeInfo info = employeeManager.findReadyEmployeeForLine(line.getId());
-                    if (info != null) {
-                        SetOnCheckoutLineCommand command = new SetOnCheckoutLineCommand();
-                        command.setCheckoutLineId(line.getId());
-                        command.setEmployeeId(info.getEmployeeId());
-                        setOnCheckoutLineCommands.add(command);
-                    } else if (!employeeManager.aboutToHaveReadyEmployee(currentTick)) {
+                List<FireEmployeeCommand> fireEmployeeCommands = new ArrayList<>();
+
+                if (!employeeManager.isGoodTeamFilled()) {
+                    for (int i = 0; i < employeeManager.getHireBatch(); i++) {
                         HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
-                        hireEmployeeCommand.setCheckoutLineId(line.getId());
                         hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
                         hireEmployeeCommands.add(hireEmployeeCommand);
-                    } //else do nothing
-                });
+                    }
+                }
+
+                for (EmployeeInfo info : employeeManager.getToFireTeam()) {
+                    if (info.getFireTick() == null) {
+                        log.warn("fire tick is null, id = " + info.getEmployeeId() + ", exp = " + info.getExperience());
+                    } else if (info.getFireTick() <= currentTick) {
+                        FireEmployeeCommand command = new FireEmployeeCommand();
+                        command.setEmployeeId(info.getEmployeeId());
+                        fireEmployeeCommands.add(command);
+                    }
+                }
+
+                for (EmployeeInfo info : employeeManager.getGoodTeam()) {
+                    if (info.getNextShotTick() != null && info.getNextShotTick() <= currentTick) {
+                        SetOnCheckoutLineCommand command = new SetOnCheckoutLineCommand();
+                        command.setCheckoutLineId(info.getLineId());
+                        command.setEmployeeId(info.getEmployeeId());
+                        setOnCheckoutLineCommands.add(command);
+                    }
+                }
+
+                // Смотрим на каких кассах нет кассира (либо не был назначен, либо ушел с кассы отдыхать), нанимаем новых кассиров и ставим на эти кассы.
+                // Нанимаем самых опытных!
+//                currentWorldResponse.getCheckoutLines().stream().filter(line -> line.getEmployeeId() == null).forEach(line -> {
+//                    EmployeeInfo info = employeeManager.findReadyEmployeeForLine(line.getId());
+//                    if (info != null) {
+//                        SetOnCheckoutLineCommand command = new SetOnCheckoutLineCommand();
+//                        command.setCheckoutLineId(line.getId());
+//                        command.setEmployeeId(info.getEmployeeId());
+//                        setOnCheckoutLineCommands.add(command);
+//                    } else if (!employeeManager.aboutToHaveReadyEmployee(currentTick)) {
+//                        HireEmployeeCommand hireEmployeeCommand = new HireEmployeeCommand();
+//                        hireEmployeeCommand.setCheckoutLineId(line.getId());
+//                        hireEmployeeCommand.setExperience(employeeManager.getUsedExperience());
+//                        hireEmployeeCommands.add(hireEmployeeCommand);
+//                    } //else do nothing
+//                });
+
                 request.setHireEmployeeCommands(hireEmployeeCommands);
                 request.setOnCheckoutLineCommands(setOnCheckoutLineCommands);
 
-                // готовимся закупать товар на склад и выставлять его на полки
+                request.setFireEmployeeCommands(fireEmployeeCommands);
+
+                 // готовимся закупать товар на склад и выставлять его на полки
                 ArrayList<BuyStockCommand> buyStockCommands = new ArrayList<>();
                 request.setBuyStockCommands(buyStockCommands);
 
@@ -141,18 +169,6 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     }
                 }
 
-//                if ((currentTick == 1000) || (currentTick == 5000) || (currentTick == 9000) ||
-//                        (currentTick == 10000)) {
-//                    Integer productId = 42;
-//                    Integer rackId = productManager.getRackForProductId(productId);
-//                    Integer quantity = productManager.getQuantityToBuy(productId, rackId, currentWorldResponse);
-//                    ProductInfo info = productManager.getUnsafeInfoForProductId(productId);
-//                    int totalStock = info.getTotalStock();
-//                    log.info(" estimate, tick = " + currentTick + ", productId = " + productId + ", quantity = " +
-//                            quantity + ", totalEstimate =" + (totalStock + quantity) + ", sold =" + info.getSold());
-//                }
-
-
                 //adding rock
                 if (currentTick == currentWorldResponse.getTickCount() - 5 && productManager.isRockEnabled()) {
                     for (Integer productId : productManager.getUsedProductIds()) {
@@ -196,8 +212,16 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
             log.info("Real score = " + (currentWorldResponse.getIncome() - currentWorldResponse.getSalaryCosts() - currentWorldResponse.getStockCosts() + productManager.getRockCost()));
             log.info("Я заработал " + (currentWorldResponse.getIncome() - currentWorldResponse.getSalaryCosts() - currentWorldResponse.getStockCosts()) + " руб.");
 
-        } catch (ApiException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
+            try {
+                while (!currentWorldResponse.isGameOver()) {
+                    CurrentTickRequest request = new CurrentTickRequest();
+                    currentWorldResponse = psApiClient.tick(request);
+                }
+            } catch (Exception e1) {
+                log.error(e.getMessage(), e);
+            }
         }
 
     }
@@ -234,7 +258,6 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
     }
 
     private void printWorldEndData(CurrentWorldResponse world) {
-        log.info("currentTick = " + world.getCurrentTick() + ", tickCount = " + world.getTickCount());
 //        printCheckoutLinesInfo(world);
 //        printEmployeesInfo(world);
 //        printOffersInfo(world);
@@ -271,10 +294,41 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
     }
 
     private void printCustomersInfo(CurrentWorldResponse world) {
-        log.info("customers = " + world.getCustomers().size());
+        log.info("tick = " + world.getCurrentTick() + ", customers = " + world.getCustomers().size());
+        int in_hall = 0;
+        int wait_checkout = 0;
+        int at_checkout = 0;
+        int in_hall_size = 0;
+        int wait_checkout_size = 0;
+        int at_checkout_size = 0;
+        Integer minId = null;
         for (Customer customer : world.getCustomers()) {
-            log.info("id = " + customer.getId() + ", mode = " + customer.getMode() + ", goods = " + customer.getBasket().size());
+            if (minId == null) {
+                minId = customer.getId();
+            } else {
+                if (customer.getId() < minId) {
+                    minId = customer.getId();
+                }
+            }
+            switch (customer.getMode()) {
+                case IN_HALL:
+                    in_hall++;
+                    in_hall_size += customer.getBasket().size();
+                    break;
+                case AT_CHECKOUT:
+                    at_checkout++;
+                    at_checkout_size += customer.getBasket().size();
+                    break;
+                case WAIT_CHECKOUT:
+                    wait_checkout++;
+                    wait_checkout_size += customer.getBasket().size();
+                    break;
+            }
         }
+        log.info("minId = " + minId);
+        log.info("IN HALL =" + in_hall + ", total basket size = " + in_hall_size);
+        log.info("AT CHECKOUT =" + at_checkout + ", total basket size = " + at_checkout_size);
+        log.info("WAIT_CHECKOUT =" + wait_checkout + ", total basket size = " + wait_checkout_size);
     }
 
     private void printEmployeesInfo(CurrentWorldResponse world) {
