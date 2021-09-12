@@ -51,8 +51,10 @@ public class EmployeeInfo {
 
     public void setStatus(EmployeeStatus status, Integer statusChangeTick) {
         updateStats(statusChangeTick);
-        this.status = status;
-        this.statusChangeTick = statusChangeTick;
+        if (status != EmployeeStatus.GAME_OVER) {
+            this.status = status;
+            this.statusChangeTick = statusChangeTick;
+        }
     }
 
     private void updateStats(Integer statusChangeTick) {

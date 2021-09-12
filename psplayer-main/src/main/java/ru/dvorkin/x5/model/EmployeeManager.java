@@ -66,8 +66,20 @@ public class EmployeeManager {
                     employeeInfo.add(info.get());
                 }
             }
+            for (EmployeeInfo info : employeeInfo) {
+                if (info.getStatus() == EmployeeStatus.FIRED || info.getStatus() == EmployeeStatus.GAME_OVER) {
+                    continue;
+                }
+                Optional<Employee> eOpt = employeeList.stream().filter(e -> e.getId().equals(info.getEmployeeId())).findFirst();
+                if (eOpt.isEmpty()) {
+                    info.setStatus(EmployeeStatus.FIRED, currentTick);
+                }
+            }
         }
         for (EmployeeInfo info : employeeInfo) {
+            if (info.getStatus() == EmployeeStatus.FIRED || info.getStatus() == EmployeeStatus.GAME_OVER) {
+                continue;
+            }
             Optional<CheckoutLine> lineOpt = findCheckOutLineByEmployeeId(world, info.getEmployeeId());
             switch(info.getStatus()) {
                 case WORKING:
@@ -107,12 +119,15 @@ public class EmployeeManager {
         for (EmployeeInfo info : employeeInfo) {
             log.info(" employee #" + info.getEmployeeId() + ", worked = " + info.getWorkTicks() +
                     ", rested = " + info.getRestTicks() + ", ready = " + info.getReadyTicks() + ", experience = " +
-                    info.getExperience());
+                    info.getExperience() + ", status = " + info.getStatus() + ", setOn = " + info.getStatusChangeTick());
         }
     }
 
     public void endGameStatusUpdate(Integer currentTick) {
         for (EmployeeInfo info : employeeInfo) {
+            if (info.getStatus() == EmployeeStatus.FIRED || info.getStatus() == EmployeeStatus.GAME_OVER) {
+                continue;
+            }
             info.setStatus(EmployeeStatus.GAME_OVER, currentTick);
         }
     }
