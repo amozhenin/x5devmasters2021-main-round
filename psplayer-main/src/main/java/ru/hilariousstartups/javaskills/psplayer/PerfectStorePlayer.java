@@ -48,7 +48,6 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 final int currentTick = currentWorldResponse.getCurrentTick();
                 employeeManager.syncWithWorld(currentWorldResponse);
                 productManager.syncWithWorld(currentWorldResponse);
-                log.info("tick = " + currentTick + ", sync is done");
                 CurrentTickRequest request = new CurrentTickRequest();
 
                 List<HireEmployeeCommand> hireEmployeeCommands = new ArrayList<>();
@@ -65,7 +64,9 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 }
 
                 for (EmployeeInfo info : employeeManager.getToFireTeam()) {
-                    if (info.getFireTick() <= currentTick) {
+                    if (info.getFireTick() == null) {
+                        log.warn("fire tick is null, id = " + info.getEmployeeId() + ", exp = " + info.getExperience());
+                    } else if (info.getFireTick() <= currentTick) {
                         FireEmployeeCommand command = new FireEmployeeCommand();
                         command.setEmployeeId(info.getEmployeeId());
                         fireEmployeeCommands.add(command);
@@ -73,7 +74,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 }
 
                 for (EmployeeInfo info : employeeManager.getGoodTeam()) {
-                    if (info.getNextShotTick() <= currentTick) {
+                    if (info.getNextShotTick() != null && info.getNextShotTick() <= currentTick) {
                         SetOnCheckoutLineCommand command = new SetOnCheckoutLineCommand();
                         command.setCheckoutLineId(info.getLineId());
                         command.setEmployeeId(info.getEmployeeId());
@@ -211,8 +212,16 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
             log.info("Real score = " + (currentWorldResponse.getIncome() - currentWorldResponse.getSalaryCosts() - currentWorldResponse.getStockCosts() + productManager.getRockCost()));
             log.info("Я заработал " + (currentWorldResponse.getIncome() - currentWorldResponse.getSalaryCosts() - currentWorldResponse.getStockCosts()) + " руб.");
 
-        } catch (ApiException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
+            try {
+                while (!currentWorldResponse.isGameOver()) {
+                    CurrentTickRequest request = new CurrentTickRequest();
+                    currentWorldResponse = psApiClient.tick(request);
+                }
+            } catch (Exception e1) {
+                log.error(e.getMessage(), e);
+            }
         }
 
     }
