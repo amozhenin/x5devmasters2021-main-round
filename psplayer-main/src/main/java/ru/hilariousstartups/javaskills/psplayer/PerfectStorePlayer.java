@@ -57,10 +57,6 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                 List<HireEmployeeCommand> hireEmployeeCommands = new ArrayList<>();
                 List<SetOnCheckoutLineCommand> setOnCheckoutLineCommands = new ArrayList<>();
 
-                if (currentTick <= 10) {
-                    printCustomersInfo(currentWorldResponse);
-                }
-
                 // Смотрим на каких кассах нет кассира (либо не был назначен, либо ушел с кассы отдыхать), нанимаем новых кассиров и ставим на эти кассы.
                 // Нанимаем самых опытных!
                 currentWorldResponse.getCheckoutLines().stream().filter(line -> line.getEmployeeId() == null).forEach(line -> {
@@ -281,7 +277,15 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
         int in_hall_size = 0;
         int wait_checkout_size = 0;
         int at_checkout_size = 0;
+        Integer minId = null;
         for (Customer customer : world.getCustomers()) {
+            if (minId == null) {
+                minId = customer.getId();
+            } else {
+                if (customer.getId() < minId) {
+                    minId = customer.getId();
+                }
+            }
             switch (customer.getMode()) {
                 case IN_HALL:
                     in_hall++;
@@ -297,6 +301,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
                     break;
             }
         }
+        log.info("minId = " + minId);
         log.info("IN HALL =" + in_hall + ", total basket size = " + in_hall_size);
         log.info("AT CHECKOUT =" + at_checkout + ", total basket size = " + at_checkout_size);
         log.info("WAIT_CHECKOUT =" + wait_checkout + ", total basket size = " + wait_checkout_size);
