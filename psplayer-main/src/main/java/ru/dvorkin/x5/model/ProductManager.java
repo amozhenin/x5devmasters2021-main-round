@@ -48,7 +48,7 @@ public class ProductManager {
                 case 7:
                 case 8:
                 case 9:
-                    return 700;
+                    return 2000;
                     //return 5100;
                 case 10:
                 case 11:
@@ -86,7 +86,7 @@ public class ProductManager {
             case 7:
             case 8:
             case 9:
-                return 1.4;
+                return 1.3;
             case 10:
             case 11:
             case 12:
