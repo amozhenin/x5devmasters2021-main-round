@@ -49,7 +49,7 @@ public class ProductManager {
                 case 7:
                 case 8:
                 case 9:
-                    return 800;
+                    return 1800;
                     //return 5100;
                 case 10:
                 case 11:
@@ -62,7 +62,7 @@ public class ProductManager {
                 default:
                     return 11111;
             }
-        } else if (world.getTickCount() - currentTick < 150) {
+        } else if (world.getTickCount() - currentTick < 240) {
             return 0;
         } else {
             double totalToBuy = ((double) info.getSold() * world.getTickCount()) / world.getCurrentTick();
@@ -89,7 +89,7 @@ public class ProductManager {
             case 7:
             case 8:
             case 9:
-                return 1.38;
+                return 1.36;
             case 10:
             case 11:
             case 12:
