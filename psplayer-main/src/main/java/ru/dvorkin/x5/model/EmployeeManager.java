@@ -55,7 +55,7 @@ public class EmployeeManager {
     }
 
     private int getThreshold() {
-        return 95;
+        return 98;
     }
 
     public boolean isGoodTeamFilled() {
@@ -283,6 +283,6 @@ public class EmployeeManager {
     }
 
     public int getHireBatch() {
-        return 30;
+        return 50;
     }
 }
