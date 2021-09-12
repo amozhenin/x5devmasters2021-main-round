@@ -55,7 +55,7 @@ public class EmployeeManager {
     }
 
     private int getThreshold() {
-        return 85;
+        return 90;
     }
 
     public boolean isGoodTeamFilled() {
@@ -176,7 +176,7 @@ public class EmployeeManager {
                 case WORKING:
                     if (lineOpt.isEmpty()) {
                         info.setStatus(EmployeeStatus.REST, currentTick);
-                        info.setNextShotTick(currentTick + REST_INTERVAL - 1);
+                        info.setNextShotTick(currentTick + REST_INTERVAL - 2);
                     }
                     if (info.getLineId() == 1) {
                         if (workingOnLine1 == info) {
