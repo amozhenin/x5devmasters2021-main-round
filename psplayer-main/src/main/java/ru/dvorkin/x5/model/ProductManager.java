@@ -90,7 +90,7 @@ public class ProductManager {
             case 7:
             case 8:
             case 9:
-                return 1.197;
+                return 1.232;
             case 10:
             case 11:
             case 12:
