@@ -54,8 +54,8 @@ public class ProductManager {
                     return 0;
                 case 10:
                 case 11:
-                    return 0;
                 case 12:
+                    return 0;
                 case 13:
                 case 14:
                 case 15:
