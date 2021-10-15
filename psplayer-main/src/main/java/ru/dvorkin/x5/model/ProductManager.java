@@ -50,8 +50,8 @@ public class ProductManager {
                     return 0;
                 case 8:
                 case 9:
-                    return 6750;
-                    //return 5100;
+                    //return 6750;
+                    return 0;
                 case 10:
                 case 11:
                 case 12:
