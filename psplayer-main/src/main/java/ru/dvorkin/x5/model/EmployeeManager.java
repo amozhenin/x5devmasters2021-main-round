@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class EmployeeManager {
@@ -30,7 +29,6 @@ public class EmployeeManager {
 
     private static final int WORK_INTERVAL = 480;
     private static final int REST_INTERVAL = 960;
-    private static final int CLOSE_INTERVAL = -5;
     private static final int BEST_TEAM_SIZE = 6;
     private static final int ONE_SHOT_TEAM_SIZE = 2;
 
@@ -54,10 +52,6 @@ public class EmployeeManager {
         return HireEmployeeCommand.ExperienceEnum.SENIOR;
     }
 
-    private int getThreshold() {
-        return 98;
-    }
-
     public boolean isGoodTeamFilled() {
         return goodTeam.size() >= BEST_TEAM_SIZE;
     }
@@ -65,23 +59,6 @@ public class EmployeeManager {
     public boolean isShotTeamFilled() {
         return goodTeam.size() >= ONE_SHOT_TEAM_SIZE;
     }
-
-//    public Integer getMaxEfficiency() {
-//        return getEfficiency(getUsedExperience());
-//    }
-//
-//    private Integer getEfficiency(HireEmployeeCommand.ExperienceEnum experience) {
-//        switch (experience) {
-//            case JUNIOR:
-//                return 2;
-//            case MIDDLE:
-//                return 4;
-//            case SENIOR:
-//                return 6;
-//            default:
-//                return 1;
-//        }
-//    }
 
     public void syncWithWorld(CurrentWorldResponse world) {
         Integer currentTick = world.getCurrentTick();
@@ -283,6 +260,11 @@ public class EmployeeManager {
     }
 
     public int getHireBatch() {
-        return 50;
+        return 100;
     }
+
+    private int getThreshold() {
+        return 99;
+    }
+
 }
