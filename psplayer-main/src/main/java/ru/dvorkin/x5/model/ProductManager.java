@@ -47,7 +47,7 @@ public class ProductManager {
                     return 0;
                     //return 4500;
                 case 7:
-                    return 0;
+                    //return 0;
                 case 8:
                 case 9:
                     return 7000;
