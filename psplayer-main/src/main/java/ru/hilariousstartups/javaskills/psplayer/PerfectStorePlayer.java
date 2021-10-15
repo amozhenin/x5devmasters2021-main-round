@@ -161,7 +161,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
                 for (Integer productId : productManager.getUsedProductIds()) {
                     ProductInfo info = productManager.getUnsafeInfoForProductId(productId);
-                    if (info.getInStock() == 0 && info.getInRack() == 0 && currentTick > 0) {
+                    if (info.getInStock() == 0 && info.getInRack() == 0 && currentTick >= 1) {
                         if (!info.isStopSpam()) {
                             log.info(" all is out, id = " + info.getProductId() + ", rack = " +
                                     productManager.getRackForProductId(productId) +", tick = " + currentTick + ", sold = " + info.getSold());
