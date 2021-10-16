@@ -161,9 +161,10 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
 
                 for (Integer productId : productManager.getUsedProductIds()) {
                     ProductInfo info = productManager.getUnsafeInfoForProductId(productId);
-                    if (info.getInStock() == 0 && info.getInRack() == 0 && currentTick > 0) {
+                    if (info.getInStock() == 0 && info.getInRack() == 0 && currentTick > 1) {
                         if (!info.isStopSpam()) {
-                            log.info(" all is out, id = " + info.getProductId() + ", tick = " + currentTick + ", sold = " + info.getSold());
+                            log.info(" all is out, id = " + info.getProductId() + ", rack = " +
+                                    productManager.getRackForProductId(productId) +", tick = " + currentTick + ", sold = " + info.getSold());
                             info.stopSpam();
                         }
                     }
@@ -250,7 +251,6 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
     private void printWorldStartData(CurrentWorldResponse world) {
         log.info("currentTick = " + world.getCurrentTick() + ", tickCount = " + world.getTickCount());
 //        printCheckoutLinesInfo(world);
-//        printEmployeesInfo(world);
 //        printOffersInfo(world);
         printCustomersInfo(world);
 //        printRackCellInfo(world);
@@ -258,20 +258,14 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
     }
 
     private void printWorldEndData(CurrentWorldResponse world) {
-//        printCheckoutLinesInfo(world);
-//        printEmployeesInfo(world);
-//        printOffersInfo(world);
         printCustomersInfo(world);
-//        printRackCellInfo(world);
-//        printProductInfo(world);
     }
 
 
     private void printProductInfo(CurrentWorldResponse world) {
         log.info("products = " + world.getStock().size());
         for (Product product : world.getStock()) {
-            log.info("id = " + product.getId() + ", name = " + product.getName() + ", inStock = " + product.getInStock() +
-                    ", stockPrice = " + product.getStockPrice());
+            log.info("id = " + product.getId() + ", name = " + product.getName() + ", stockPrice = " + product.getStockPrice());
         }
     }
 
@@ -279,10 +273,12 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
         log.info("rackCells = " + world.getRackCells().size());
         for (RackCell rackCell : world.getRackCells()) {
             log.info("id = " + rackCell.getId() + ", visibility = " + rackCell.getVisibility() + ", capacity = " +
-                    rackCell.getCapacity() + ", productId = " +
-                    (rackCell.getProductId() == null ? "null" : rackCell.getProductId().toString()) +
-                    ", productName = " + (rackCell.getProductName() == null ? "null" : rackCell.getProductName()) +
-                    ", productQuantity = " + (rackCell.getProductQuantity() == null ? "null" : rackCell.getProductQuantity().toString()));
+                    rackCell.getCapacity()
+//                    + ", productId = " +
+//                    (rackCell.getProductId() == null ? "null" : rackCell.getProductId().toString()) +
+//                    ", productName = " + (rackCell.getProductName() == null ? "null" : rackCell.getProductName()) +
+//                    ", productQuantity = " + (rackCell.getProductQuantity() == null ? "null" : rackCell.getProductQuantity().toString())
+        );
         }
     }
 
@@ -331,20 +327,7 @@ public class PerfectStorePlayer implements ApplicationListener<ApplicationReadyE
         log.info("WAIT_CHECKOUT =" + wait_checkout + ", total basket size = " + wait_checkout_size);
     }
 
-    private void printEmployeesInfo(CurrentWorldResponse world) {
-        log.info("employees = " + world.getEmployees().size());
-        for (Employee employee : world.getEmployees()) {
-            log.info("id = " + employee.getId() + ", firstName = " + employee.getFirstName() + ", lastName = " +
-                    employee.getLastName() + ", experience = " + employee.getExperience() + ", salary = " + employee.getSalary());
-        }
-    }
-
     private void printCheckoutLinesInfo(CurrentWorldResponse world) {
         log.info("checkoutLines = " + world.getCheckoutLines().size());
-        for (CheckoutLine checkoutLine : world.getCheckoutLines()) {
-            log.info("id = " + checkoutLine.getId() + ", employeeId = " +
-                    (checkoutLine.getEmployeeId() == null ? "null": checkoutLine.getEmployeeId().toString())
-                    + ", customerId = " + (checkoutLine.getCustomerId() == null ? "null" : checkoutLine.getCustomerId().toString()));
-        }
     }
 }
