@@ -47,17 +47,17 @@ public class ProductManager {
                     return 0;
                     //return 4500;
                 case 7:
+                    return 0;
                 case 8:
                 case 9:
-                    return 1400;
-                    //return 5100;
+                    return 7950;
                 case 10:
                 case 11:
                 case 12:
                 case 13:
                 case 14:
                 case 15:
-                    return 10000;
+                    return 17420;
                     //return 11400;
                 default:
                     return 11111;
@@ -89,7 +89,7 @@ public class ProductManager {
             case 7:
             case 8:
             case 9:
-                return 1.33;
+                return 1.197;
             case 10:
             case 11:
             case 12:
